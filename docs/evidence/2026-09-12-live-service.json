@@ -1,0 +1,78 @@
+{
+  "kind": "authenticated-production-verification",
+  "started_at": "2026-09-12T18:57:45.096027+00:00",
+  "finished_at": "2026-09-12T18:58:17.851762+00:00",
+  "success": true,
+  "run_id": "run_4740b70c153743e9818c252e7d0ebd61",
+  "branch": "devgod/run_4740b70c153743e9818c252e7d0ebd61",
+  "verified_gate": {
+    "candidate_digest": "93c6858dbbf68049af991efe09ad844ba99f6f548a83062c7bccb124b3c7592b",
+    "checks_digest": "61a3f7f5e1b743ac9903b5f06291f80d6844e8a9e7729ba2217ba4322f87593b",
+    "evidence_ids": [
+      "bdfcac86301d486f2302e92a",
+      "3827f2f14adb71e0c3bce79a",
+      "a6afd8e1e057441e506831b3",
+      "9c564cf6c0cd2d31f2ea0822"
+    ],
+    "unmet_requirements": [],
+    "verified": true
+  },
+  "stale_candidate_state": "repair",
+  "runtime": {
+    "devgod": "0.1.0",
+    "openai_codex": "0.154.0",
+    "python": "3.12.3",
+    "source_sha256": {
+      "__init__.py": "ef0fd71eafd7ab30bde5f3fdcc651d7fe1c35b52a7c3fd58858ed4f709549db3",
+      "__main__.py": "41b062115f6cc7885fa3708a0de2cf1f16dcdf58f65429758b0c0bffc46ab35e",
+      "cli.py": "767f4e26f5b86e296cc89dea24c9f786bfd41cdfcac42d576776cbab7536b884",
+      "codex_adapter.py": "8dad54f68dc308bef9b141550d24bb3ef8f34365ce0191be8a4171ac6ff14d74",
+      "hooks.py": "421d564d47e9f9796f368925697759d02596f8130d7cb68028d9375894c34632",
+      "install.py": "2f458db5e32180bd0adc320dace9819c30a2a7a7ac2a5e295b0ee096f0b23568",
+      "launcher.py": "f4b4c48557d00a2df976b4a9c3670b4edfbba1efd6f1eb61a5b89e60a863d683",
+      "mcp_server.py": "c7b0020427fcb3be3835359e65b8328ad7468d340444cab5bc5b4011b5dc2be2",
+      "models.py": "ab37df3ac1002a9c1e557e97dd313139256f0dc793756f14ebfe06f4f0f23c84",
+      "service.py": "c642d77b340ac860c86da9b0a11989f9bc7f5856713b57786a000cba7d63c34d",
+      "store.py": "03a4c87943fc9f5245d57cfbfd08db4389d78b36d9e912dbae9916fad5518258",
+      "verification.py": "8caceb2a4adb819510b5ce92706a6268e4b24d93be3799b418ce7cf9f6d6310d",
+      "workspace.py": "72eed060fa0cd62b680ddb18c7f69a61bd3c6b2d0aaeee6b5730b240c8ec4f03"
+    }
+  },
+  "reviews": [
+    {
+      "role": "qa_engineer",
+      "thread_id": "01a096fb-9e04-7840-ae36-0ec6844cdc28",
+      "turn_id": "01a096fb-9e97-7881-8d13-4d3a62454a2c",
+      "decision": "approve",
+      "evidence_id": "a6afd8e1e057441e506831b3"
+    },
+    {
+      "role": "reviewer",
+      "thread_id": "01a096fb-9dfd-79f3-afa3-9dc57877a622",
+      "turn_id": "01a096fb-9e78-7bf1-b61e-95fda7224d4a",
+      "decision": "approve",
+      "evidence_id": "3827f2f14adb71e0c3bce79a"
+    },
+    {
+      "role": "security_reviewer",
+      "thread_id": "01a096fb-9e04-7ed2-9aa1-ffe5ae54f597",
+      "turn_id": "01a096fb-9e8e-7bb1-b2a0-13ca4603ce4b",
+      "decision": "approve",
+      "evidence_id": "9c564cf6c0cd2d31f2ea0822"
+    }
+  ],
+  "checks": [
+    {
+      "evidence_id": "3c963bae7890751fcdd82bd4",
+      "exit_code": 1,
+      "succeeded": false
+    },
+    {
+      "evidence_id": "bdfcac86301d486f2302e92a",
+      "exit_code": 0,
+      "succeeded": true
+    }
+  ],
+  "implementation_mode": "scripted fixture; native implementation delegation is separate evidence",
+  "raw_report_path": "/tmp/devgod-live-xoi_jxwq/report.json"
+}

@@ -1,0 +1,377 @@
+{
+  "date": "2026-09-12",
+  "scope": "native manager with explicit test-client MCP config",
+  "delivery_status": "passed",
+  "wrapper_status": "failed",
+  "duration_seconds": 290.999,
+  "wheel_sha256": "a39f98248167df81f06774887401684cae9cc8f2bd1b682738c919120d74c235",
+  "thread_id": "01a096fc-41f4-7351-9ca8-93aa535b7be4",
+  "turn_id": "01a096fc-428d-70d3-baf1-19fe9b9f3063",
+  "model": "gpt-6-astra",
+  "run_id": "run_8f31087c2bfe413daf6032cc5e444748",
+  "branch": "devgod/run_8f31087c2bfe413daf6032cc5e444748",
+  "run_state": "verified",
+  "gate": {
+    "candidate_digest": "ceba2a118b5b7b9e31d2c8b852ac07b7226cecb667eaf73c483b9cf3698dfb5b",
+    "checks_digest": "e1ee4e789ff60dbb2ca6450ed9fa85f6a840330a4308bade7ff85bc1d4961dd9",
+    "evidence_ids": [
+      "5847df27cf7cc6492e61f787",
+      "d78769b25dca4aeee1205d9a",
+      "6df7eca9584a2bf362968a90",
+      "c22ed460874f6cca0c92a9d3"
+    ],
+    "unmet_requirements": [],
+    "verified": true
+  },
+  "tasks": [
+    {
+      "task_id": "T1",
+      "state": "verified",
+      "depends_on": [],
+      "acceptance": [
+        "A1"
+      ]
+    },
+    {
+      "task_id": "T2",
+      "state": "verified",
+      "depends_on": [
+        "T1"
+      ],
+      "acceptance": [
+        "A2"
+      ]
+    }
+  ],
+  "native_child_starts": [
+    {
+      "agent_path": "/root/planner",
+      "thread_id": "01a096fc-98e4-7050-aae6-e1ba7190c1f4"
+    },
+    {
+      "agent_path": "/root/greeting_implementation",
+      "thread_id": "01a096fd-b975-7b12-97ec-c9c2a961cc67"
+    },
+    {
+      "agent_path": "/root/welcome_implementation",
+      "thread_id": "01a096fe-baf5-7dd0-9c3f-a0d090542625"
+    }
+  ],
+  "mcp_call_count": 17,
+  "mcp_calls": [
+    {
+      "id": "exec-79e96f72-e136-4c0d-be1a-3591943ac8da",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "status",
+      "status": "completed"
+    },
+    {
+      "id": "exec-c37fafb8-48d4-4c90-905a-35109733e8c5",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "run_start",
+      "status": "failed"
+    },
+    {
+      "id": "exec-c0c8dc0f-a447-43d7-99ee-321d4aa8d141",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "run_start",
+      "status": "completed"
+    },
+    {
+      "id": "exec-c180f2be-1961-4ea1-bb41-21e3b030a24e",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "checkpoint",
+      "status": "completed"
+    },
+    {
+      "id": "exec-677657be-5287-430b-88c5-981bcbd5ad3d",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "task_update",
+      "status": "completed"
+    },
+    {
+      "id": "exec-305ae904-c250-4236-89c7-71b30d6a566f",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "next",
+      "status": "completed"
+    },
+    {
+      "id": "exec-0a1334cd-a3e2-4c7d-a17e-ad6e1eae8c3a",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "task_update",
+      "status": "completed"
+    },
+    {
+      "id": "exec-2cf18316-34ec-4844-a99b-43af4bb0b0c1",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "checkpoint",
+      "status": "completed"
+    },
+    {
+      "id": "exec-25c46102-e105-4d17-8539-640e86909e58",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "task_update",
+      "status": "completed"
+    },
+    {
+      "id": "exec-d440496b-2377-427c-b922-b8df641af65a",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "status",
+      "status": "completed"
+    },
+    {
+      "id": "exec-201c18ce-cf6c-4dbc-b3d4-554ae7175a5f",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "task_update",
+      "status": "completed"
+    },
+    {
+      "id": "exec-bf3fee5d-6813-443c-8274-e5ebe8d5e6d5",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "checkpoint",
+      "status": "completed"
+    },
+    {
+      "id": "exec-2577b763-a01c-4d97-aa40-bccba43a9dd9",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "verify",
+      "status": "completed"
+    },
+    {
+      "id": "exec-c093c7d7-9d92-42ee-a0fb-85b1f8ad748b",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "verification_status",
+      "status": "completed"
+    },
+    {
+      "id": "exec-ae7969a2-b0c1-47a3-8e2c-53232aa1bb25",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "wait",
+      "status": "completed"
+    },
+    {
+      "id": "exec-d9e3a1f5-779d-490d-8696-befcbeef6c15",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "checkpoint",
+      "status": "completed"
+    },
+    {
+      "id": "exec-bd430543-667e-467d-bbe9-781fc03dad62",
+      "type": "mcpToolCall",
+      "server": "devgod",
+      "tool": "status",
+      "status": "completed"
+    }
+  ],
+  "approval_requests": [],
+  "mcp_approval_errors": [],
+  "checks": [
+    {
+      "check_name": "unittest-regressions",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-v"
+      ],
+      "exit_code": 0,
+      "succeeded": true,
+      "accepted_for_gate": true,
+      "evidence_id": "5847df27cf7cc6492e61f787",
+      "invocation_id": "4d3b7e0abc0c473daa6df0d2661548e6"
+    }
+  ],
+  "reviews": [
+    {
+      "role": "reviewer",
+      "decision": "approve",
+      "accepted_for_gate": true,
+      "evidence_id": "d78769b25dca4aeee1205d9a",
+      "invocation_id": "360a00c8971c4f50bdaf8512b65d1ffe",
+      "acceptance_ids": [
+        "A1",
+        "A2"
+      ],
+      "findings": []
+    },
+    {
+      "role": "security_reviewer",
+      "decision": "approve",
+      "accepted_for_gate": true,
+      "evidence_id": "c22ed460874f6cca0c92a9d3",
+      "invocation_id": "b49e8e8606ae4cfba9afa87ce9449fd4",
+      "acceptance_ids": [
+        "A1",
+        "A2"
+      ],
+      "findings": []
+    },
+    {
+      "role": "qa_engineer",
+      "decision": "approve",
+      "accepted_for_gate": true,
+      "evidence_id": "6df7eca9584a2bf362968a90",
+      "invocation_id": "4999ca42414949b6b639841e7cd60711",
+      "acceptance_ids": [
+        "A1",
+        "A2"
+      ],
+      "findings": []
+    }
+  ],
+  "jobs": [
+    {
+      "job_id": "1aecdb88dbc6c474a00ca6b8",
+      "kind": "verification",
+      "role": null,
+      "state": "succeeded",
+      "result": {
+        "candidate_digest": "ceba2a118b5b7b9e31d2c8b852ac07b7226cecb667eaf73c483b9cf3698dfb5b",
+        "checks_digest": "e1ee4e789ff60dbb2ca6450ed9fa85f6a840330a4308bade7ff85bc1d4961dd9",
+        "evidence_ids": [
+          "5847df27cf7cc6492e61f787",
+          "d78769b25dca4aeee1205d9a",
+          "6df7eca9584a2bf362968a90",
+          "c22ed460874f6cca0c92a9d3"
+        ],
+        "unmet_requirements": [],
+        "verified": true
+      }
+    },
+    {
+      "job_id": "51ab879cadc6ccc0c15b537f",
+      "kind": "check",
+      "role": null,
+      "state": "succeeded",
+      "result": {
+        "evidence_id": "5847df27cf7cc6492e61f787",
+        "execution_terminated": true,
+        "invocation_id": "4d3b7e0abc0c473daa6df0d2661548e6",
+        "succeeded": true
+      }
+    },
+    {
+      "job_id": "80936d3ec9398f22d6a8290e",
+      "kind": "review",
+      "role": "reviewer",
+      "state": "succeeded",
+      "result": {
+        "decision": "approve",
+        "evidence_id": "d78769b25dca4aeee1205d9a",
+        "execution_terminated": true
+      }
+    },
+    {
+      "job_id": "ec14208d99a9ff2e56c72350",
+      "kind": "review",
+      "role": "qa_engineer",
+      "state": "succeeded",
+      "result": {
+        "decision": "approve",
+        "evidence_id": "6df7eca9584a2bf362968a90",
+        "execution_terminated": true
+      }
+    },
+    {
+      "job_id": "c5dc2af587306692c06394a7",
+      "kind": "review",
+      "role": "security_reviewer",
+      "state": "succeeded",
+      "result": {
+        "decision": "approve",
+        "evidence_id": "c22ed460874f6cca0c92a9d3",
+        "execution_terminated": true
+      }
+    }
+  ],
+  "fixture_file_hashes": {
+    "greetings.py": "355eb347a7866662de484b577f8e5da49a4766006b54abd222b7c8ca7e509643",
+    "welcome.py": "fcb87d664326084045933e79c8f56587385afbd6fae47134089e826496f74b53",
+    "test_welcome.py": "144f9c4625d03c682f0c7faec8a97a407c4c0edc3dd7eeda5d5bed90a845b708",
+    "test_greetings.py": "969236653c7240ffb994dca933296b8bbac29e9c011704d02d0d457b07dd8590"
+  },
+  "client_mcp_override": true,
+  "hook_trust_granted": false,
+  "hook_lifecycle_and_first_use_ui_trust_tested": false,
+  "global_config_observation": {
+    "modified": true,
+    "hashes": {
+      "before": "83964ffbff99a83bc86f45063047697d475cd05f9c8619b650e37c2c611277dc",
+      "after": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3"
+    },
+    "attribution": "Resolved: Codex app-server project-trust registration during workspace-write thread/start. Original byte-hash reconstruction and isolated syscall trace recorded in 2026-09-12-config-write.json.",
+    "initialization_probe": {
+      "scope": "hash-only config observation; initialize/thread-start, no model turn",
+      "stages": [
+        {
+          "stage": "before_constructor",
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "changed_keys": []
+        },
+        {
+          "stage": "after_constructor",
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "changed_keys": []
+        },
+        {
+          "stage": "after_start",
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "changed_keys": []
+        },
+        {
+          "stage": "after_initialize",
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "changed_keys": []
+        },
+        {
+          "stage": "after_thread_start",
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "changed_keys": []
+        },
+        {
+          "stage": "after_close",
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "changed_keys": []
+        }
+      ],
+      "raw_report_path": "/tmp/devgod-config-probe-r49rfajd/report.json"
+    },
+    "bounded_audit": {
+      "parent_command_count": 8,
+      "parent_global_write_targets_observed": false,
+      "parent_mcp_servers": [
+        "devgod"
+      ],
+      "scope_limits": [
+        "Parent native events do not contain a complete filesystem audit of every child process.",
+        "The short probe does not execute a model turn and cannot exclude deferred host/runtime writes.",
+        "No global config contents or secrets were recorded, no global config was edited, and no further full native execution was performed."
+      ],
+      "source_audit": "DevGod installer writes guarded repository-relative .codex files. Codex Python client construction/start/initialize builds process arguments/environment and JSON-RPC initialization, without direct global config writes.",
+      "conclusion": "Historical preliminary conclusion; superseded by the exact byte reconstruction and isolated thread/start syscall reproduction."
+    },
+    "resolution_evidence": "2026-09-12-config-write.json"
+  },
+  "notes": [
+    "One run_start schema error from spaced role names was corrected by the manager without user intervention.",
+    "The wrapper treats the shared global configuration hash change as a failed assertion separately from the successful delivery gate."
+  ],
+  "raw_report_path": "/tmp/devgod-native-5nu3_qy8/report.json"
+}

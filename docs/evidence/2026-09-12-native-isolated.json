@@ -1,0 +1,263 @@
+{
+  "date": "2026-09-12",
+  "scope": "native manager with explicit test-client MCP config",
+  "delivery_status": "passed",
+  "raw_wrapper_status": "failed",
+  "raw_wrapper_error": "Private CODEX_HOME was not observed across every runtime role",
+  "duration_seconds": 283.518,
+  "wheel_sha256": "a39f98248167df81f06774887401684cae9cc8f2bd1b682738c919120d74c235",
+  "thread_id": "01a0973a-427b-73f1-adfa-f03a840bc5d1",
+  "turn_id": "01a0973a-42bd-7883-83fb-4892dfe8df7a",
+  "model": "gpt-6-astra",
+  "run_id": "run_63bb5cc6455c4594a19ce6a6fe910b76",
+  "branch": "devgod/run_63bb5cc6455c4594a19ce6a6fe910b76",
+  "run_state": "verified",
+  "gate": {
+    "candidate_digest": "d224976aed0d9a215b20a81d6a01f043979224a58e696ac64f91deb1abf156b1",
+    "checks_digest": "ef22cd4db3314185e810aebeaf38056aa5513342de1527b38f2c5874ebe101e7",
+    "evidence_ids": [
+      "b724bbe8d9f6476c762e585c",
+      "4c8b50726dd898f278a9d5e0",
+      "069791a5ba54c7aeea820398",
+      "0fc1c8fdb802ae21c2a16278"
+    ],
+    "unmet_requirements": [],
+    "verified": true
+  },
+  "tasks": [
+    {
+      "task_id": "T1",
+      "state": "verified",
+      "depends_on": []
+    },
+    {
+      "task_id": "T2",
+      "state": "verified",
+      "depends_on": [
+        "T1"
+      ]
+    }
+  ],
+  "native_child_thread_ids": [
+    "01a0973a-b753-78f3-874a-ed7e99bb2d86",
+    "01a0973b-bf34-7670-a214-a18053a5cbee",
+    "01a0973c-cd0f-7891-8a76-f7f7e224b8c6"
+  ],
+  "mcp_call_count": 17,
+  "approval_requests": [],
+  "mcp_approval_errors": [],
+  "checks": [
+    {
+      "check_name": "unittest",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-v"
+      ],
+      "exit_code": 0,
+      "succeeded": true,
+      "accepted_for_gate": true,
+      "evidence_id": "b724bbe8d9f6476c762e585c",
+      "invocation_id": "f5b4997ae6fe4f599d58898cb2d8f115"
+    }
+  ],
+  "reviews": [
+    {
+      "role": "reviewer",
+      "decision": "approve",
+      "accepted_for_gate": true,
+      "evidence_id": "4c8b50726dd898f278a9d5e0",
+      "invocation_id": "7eb87d909c844b75abb6281c68df3dc0",
+      "acceptance_ids": [
+        "A1",
+        "A2"
+      ],
+      "findings": []
+    },
+    {
+      "role": "qa_engineer",
+      "decision": "approve",
+      "accepted_for_gate": true,
+      "evidence_id": "069791a5ba54c7aeea820398",
+      "invocation_id": "58204c18bd574610ab1dff04213b27ad",
+      "acceptance_ids": [
+        "A1",
+        "A2"
+      ],
+      "findings": []
+    },
+    {
+      "role": "security_reviewer",
+      "decision": "approve",
+      "accepted_for_gate": true,
+      "evidence_id": "0fc1c8fdb802ae21c2a16278",
+      "invocation_id": "c68e7942c4704de4b5090fc9f85ff0e5",
+      "acceptance_ids": [
+        "A1",
+        "A2"
+      ],
+      "findings": []
+    }
+  ],
+  "configuration_isolation": {
+    "private_home": "/tmp/devgod-smoke-codex-0nf6jydo",
+    "copied_setting_names": [
+      "cli_auth_credentials_store",
+      "model",
+      "model_reasoning_effort"
+    ],
+    "shared_hashes_before": {
+      "config.toml": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+      "auth.json": "4533d3569f494a782a892940223c0abe4709524c43406c023e0259f263f47819"
+    },
+    "shared_hashes_after": {
+      "config.toml": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+      "auth.json": "4533d3569f494a782a892940223c0abe4709524c43406c023e0259f263f47819"
+    },
+    "private_config_sha256": "f23b21cc680a1a49c2cfaa46bad9a16c1efe15b8fadb42ba1b1c84f59f83c246",
+    "native_private_project_registered": true,
+    "private_home_outside_consumer": true,
+    "private_home_outside_report": true,
+    "private_home_removed": true
+  },
+  "global_config_modified": false,
+  "global_auth_modified": false,
+  "native_app_server_pid": 67661,
+  "native_app_server_executable": "/tmp/devgod-package-ywokfybb/venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+  "native_app_server_executable_sha256": "3188814c35471432d4123203e0eb38e5bddc60226e3d7ddf0e59e649ea140022",
+  "recorded_process_observations": [
+    {
+      "pid": 67661,
+      "parent_pid": 67590,
+      "start_ticks": "1168112",
+      "role": "verification_app_server",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 68060,
+      "parent_pid": 67661,
+      "start_ticks": "1168201",
+      "role": "devgod_mcp",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75522,
+      "parent_pid": 68060,
+      "start_ticks": "1189708",
+      "role": "verification_supervisor",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75525,
+      "parent_pid": 68060,
+      "start_ticks": "1189709",
+      "role": "verification_supervisor",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75529,
+      "parent_pid": 68060,
+      "start_ticks": "1189709",
+      "role": "verification_supervisor",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75532,
+      "parent_pid": 75522,
+      "start_ticks": "1189714",
+      "role": "verification_app_server",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75533,
+      "parent_pid": 75525,
+      "start_ticks": "1189715",
+      "role": "verification_app_server",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75545,
+      "parent_pid": 75529,
+      "start_ticks": "1189715",
+      "role": "verification_app_server",
+      "private_codex_home_matches": true
+    }
+  ],
+  "corrected_process_observations": [
+    {
+      "pid": 67661,
+      "parent_pid": 67590,
+      "start_ticks": "1168112",
+      "role": "native_app_server",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 68060,
+      "parent_pid": 67661,
+      "start_ticks": "1168201",
+      "role": "devgod_mcp",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75522,
+      "parent_pid": 68060,
+      "start_ticks": "1189708",
+      "role": "verification_supervisor",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75525,
+      "parent_pid": 68060,
+      "start_ticks": "1189709",
+      "role": "verification_supervisor",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75529,
+      "parent_pid": 68060,
+      "start_ticks": "1189709",
+      "role": "verification_supervisor",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75532,
+      "parent_pid": 75522,
+      "start_ticks": "1189714",
+      "role": "verification_app_server",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75533,
+      "parent_pid": 75525,
+      "start_ticks": "1189715",
+      "role": "verification_app_server",
+      "private_codex_home_matches": true
+    },
+    {
+      "pid": 75545,
+      "parent_pid": 75529,
+      "start_ticks": "1189715",
+      "role": "verification_app_server",
+      "private_codex_home_matches": true
+    }
+  ],
+  "isolation_observation_validation": {
+    "status": "passed",
+    "method": "Reclassify the process whose recorded PID exactly equals native_app_server_pid as native_app_server; preserve all original parent IDs and measured environment-match booleans.",
+    "required_roles": [
+      "devgod_mcp",
+      "native_app_server",
+      "verification_app_server",
+      "verification_supervisor"
+    ],
+    "note": "The raw monitor overwrote the main process role when its argv contained app-server. This is a reporting classification defect. The original report is unaltered; the corrected classifier is covered by focused regressions.",
+    "corrected_classifier_regressions_passed": 12,
+    "independent_security_review": "passed",
+    "corrected_smoke_script_sha256": "e5210d4835f9368d50e5057299f7d3347fd67408f1f14ff2b244c95fc7c04407"
+  },
+  "hook_trust_granted": false,
+  "raw_report_path": "/tmp/devgod-native-ecsn6dv6/report.json",
+  "raw_report_sha256": "edb1e45e3e82828610cf2bc1d91cc2f20920851d7296bfe86f9b647df3ebcf09"
+}

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "devgod": {
+      "command": "/usr/bin/env",
+      "args": [
+        "-u",
+        "PYTHONPATH",
+        "-u",
+        "PYTHONHOME",
+        "PYTHONNOUSERSITE=1",
+        "devgod",
+        "mcp"
+      ]
+    }
+  }
+}

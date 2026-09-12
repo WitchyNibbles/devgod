@@ -1,0 +1,4 @@
+interface:
+  display_name: "DevGod"
+  short_description: "Deliver verified local branches through Codex"
+  default_prompt: "Use DevGod to implement and verify this engineering task."

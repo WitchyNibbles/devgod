@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-12",
+  "command": "bash scripts/check.sh -q",
+  "ruff": "passed",
+  "mypy": {
+    "status": "passed",
+    "source_modules": 13
+  },
+  "pytest": {
+    "passed": 212,
+    "failed": 0,
+    "duration_seconds": 32.05,
+    "selection": "not live"
+  },
+  "independent_security": {
+    "status": "passed",
+    "tests_passed": 53,
+    "remaining_high_medium_findings": 0
+  },
+  "remote_ci_executed": false,
+  "native_smoke_isolation": {
+    "tests_passed": 12,
+    "independent_security_review": "passed",
+    "independent_test_duration_seconds": 0.58,
+    "scope": "Private test configuration/credential files, cleanup, and shared-file integrity; production modules unchanged."
+  }
+}

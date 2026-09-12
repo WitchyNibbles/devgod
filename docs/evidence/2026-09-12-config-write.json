@@ -1,0 +1,280 @@
+{
+  "date": "2026-09-12",
+  "status": "cause_resolved",
+  "cause": "Pinned Codex app-server persists a project trust entry during workspace-write thread/start in this native smoke configuration, before any model turn.",
+  "runtime_version": "0.154.0",
+  "historical_exact_reconstruction": {
+    "fixture": "/tmp/devgod-native-5nu3_qy8/consumer",
+    "removed_bytes": 75,
+    "recorded_before": "83964ffbff99a83bc86f45063047697d475cd05f9c8619b650e37c2c611277dc",
+    "recorded_after": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+    "reconstructed_before": "83964ffbff99a83bc86f45063047697d475cd05f9c8619b650e37c2c611277dc",
+    "reconstructed_after": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+    "changed_key": "projects./tmp/devgod-native-5nu3_qy8/consumer.trust_level",
+    "exact_match": true
+  },
+  "reproduction": {
+    "status": "passed",
+    "turn_mode": "none",
+    "model_turn_started": false,
+    "thread_id": "01a09734-4bd2-7db2-8a10-8b4c7c0a85b0",
+    "stages": [
+      {
+        "name": "before_private_copy",
+        "epoch_ns": 1789243178099950213,
+        "monotonic_ns": 11296618545610,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": null,
+          "changed_key_paths": []
+        }
+      },
+      {
+        "name": "after_private_copy",
+        "epoch_ns": 1789243178106606129,
+        "monotonic_ns": 11296625201400,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789243178099251946,
+          "ctime_ns": 1789243178099251946,
+          "inode": 1371612,
+          "changed_key_paths": []
+        }
+      },
+      {
+        "name": "after_imports",
+        "epoch_ns": 1789243179003805605,
+        "monotonic_ns": 11297522400846,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789243178099251946,
+          "ctime_ns": 1789243178099251946,
+          "inode": 1371612,
+          "changed_key_paths": []
+        }
+      },
+      {
+        "name": "after_git_fixture",
+        "epoch_ns": 1789243179183606697,
+        "monotonic_ns": 11297702202066,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789243178099251946,
+          "ctime_ns": 1789243178099251946,
+          "inode": 1371612,
+          "changed_key_paths": []
+        }
+      },
+      {
+        "name": "after_devgod_init",
+        "epoch_ns": 1789243179809438450,
+        "monotonic_ns": 11298328033711,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789243178099251946,
+          "ctime_ns": 1789243178099251946,
+          "inode": 1371612,
+          "changed_key_paths": []
+        }
+      },
+      {
+        "name": "after_constructor",
+        "epoch_ns": 1789243179817042569,
+        "monotonic_ns": 11298335637888,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789243178099251946,
+          "ctime_ns": 1789243178099251946,
+          "inode": 1371612,
+          "changed_key_paths": []
+        }
+      },
+      {
+        "name": "after_start",
+        "epoch_ns": 1789243179838120126,
+        "monotonic_ns": 11298356716137,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789243178099251946,
+          "ctime_ns": 1789243178099251946,
+          "inode": 1371612,
+          "changed_key_paths": []
+        }
+      },
+      {
+        "name": "after_initialize",
+        "epoch_ns": 1789243181505542945,
+        "monotonic_ns": 11300024138801,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789243178099251946,
+          "ctime_ns": 1789243178099251946,
+          "inode": 1371612,
+          "changed_key_paths": []
+        }
+      },
+      {
+        "name": "after_thread_start",
+        "epoch_ns": 1789243183333865918,
+        "monotonic_ns": 11301852461247,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "afb0451fe4fb14697b4d7aea50f075fbb39cb3211614f04ccb08c62ba823eec6",
+          "size": 13336,
+          "mtime_ns": 1789243181551840437,
+          "ctime_ns": 1789243181551840437,
+          "inode": 1371782,
+          "changed_key_paths": [
+            [
+              "projects",
+              "/tmp/devgod-config-staged-jwt8jkrp/consumer",
+              "trust_level"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "after_close",
+        "epoch_ns": 1789243183374463154,
+        "monotonic_ns": 11301893058620,
+        "shared": {
+          "sha256": "b7dce39a127a80ccc5c87ad0ecf8d0ef2d129fd1aa1bbd1ebfa2aaa541758ca3",
+          "size": 13254,
+          "mtime_ns": 1789239509479139630,
+          "ctime_ns": 1789239509479139630,
+          "inode": 1355151,
+          "changed_key_paths": []
+        },
+        "private": {
+          "sha256": "afb0451fe4fb14697b4d7aea50f075fbb39cb3211614f04ccb08c62ba823eec6",
+          "size": 13336,
+          "mtime_ns": 1789243181551840437,
+          "ctime_ns": 1789243181551840437,
+          "inode": 1371782,
+          "changed_key_paths": []
+        }
+      }
+    ],
+    "shared_config_changed": false,
+    "private_home_removed": true,
+    "approval_methods": [],
+    "raw_report_path": "/tmp/devgod-config-staged-jwt8jkrp/report.json"
+  },
+  "syscall_attribution": {
+    "sdk_python_pid": 64399,
+    "app_server_pid": 64428,
+    "writer_thread_id": 64442,
+    "thread_creation_chain": [
+      64428,
+      64431,
+      64442
+    ],
+    "operation": "Create private0600 temporary file, write configuration bytes, and atomically rename it over private CODEX_HOME/config.toml.",
+    "write_epoch_seconds": 1789243181.556167,
+    "trace_excerpt": [
+      "64399 1789243179.828000 vfork()         = 64428",
+      "64428 1789243179.886544 clone(child_stack=0x72b007ffec28, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID|0x400000, parent_tid=[64431], tls=0x72b007fffb38, child_tidptr=0x72b017f01f60) = 64431",
+      "64431 1789243179.899903 clone(child_stack=0x72aff99fac28, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID|0x400000, parent_tid=[64442], tls=0x72aff99fbb38, child_tidptr=0x72b017f01f60) = 64442",
+      "64442 1789243181.550178 open(\"<private-codex-home>/config.toml\", O_RDONLY|O_LARGEFILE|O_CLOEXEC) = 33",
+      "64442 1789243181.555661 open(\"<private-codex-home>/.tmppyYapG\", O_RDWR|O_CREAT|O_EXCL|O_LARGEFILE|O_CLOEXEC, 0600) = 33",
+      "64442 1789243181.555963 write(0x21, 0x72aff7053e80, 0x3418) = 0x3418",
+      "64442 1789243181.556167 renameat(AT_FDCWD, \"<private-codex-home>/.tmppyYapG\", AT_FDCWD, \"<private-codex-home>/config.toml\") = 0"
+    ],
+    "trace_sha256": "4ef35104bbd93241f88690b9a13d52b685549f7f1de5b204fe240203c5cac3e5",
+    "raw_trace_path": "/tmp/devgod-config-staged.trace",
+    "trace_privacy": "Read buffers and configuration values were not traced; write buffers use raw pointer/count output."
+  },
+  "interpretation_limits": [
+    "Historical trace was unavailable; exact original byte hashes and thread timing match the directly reproduced operation.",
+    "This attributes the observed native smoke change; it does not claim every runtime mode writes project trust.",
+    "Private-home isolation is a test-harness fix. Production reviewer authentication is unchanged."
+  ],
+  "fix": "Native smoke uses a temporary private Codex home with scoped settings and credentials, checks shared config/auth hashes, and removes private credential material on exit.",
+  "fix_verification": {
+    "native_delivery": "passed",
+    "shared_configuration_unchanged": true,
+    "shared_authentication_file_unchanged": true,
+    "private_credential_material_removed": true,
+    "process_propagation": "passed on recorded observations after documented root-PID classification correction",
+    "native_evidence": "2026-09-12-native-isolated.json",
+    "isolation_and_classifier_regressions_passed": 12,
+    "independent_security_review": "passed"
+  }
+}

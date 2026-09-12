@@ -1,0 +1,19 @@
+{
+  "name": "devgod",
+  "version": "0.1.0",
+  "description": "Autonomous engineering through native Codex with durable, independently executed verification.",
+  "author": {
+    "name": "DevGod contributors"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "DevGod",
+    "shortDescription": "Deliver verified local branches through Codex.",
+    "longDescription": "A repository workflow for native planning and implementation specialists, durable checkpoints, sandboxed checks, and independent reviewer, QA, and security sessions.",
+    "developerName": "DevGod contributors",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Implement and verify this engineering task with DevGod."
+  },
+  "mcpServers": "./.mcp.json"
+}

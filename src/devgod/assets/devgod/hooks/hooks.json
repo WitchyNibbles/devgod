@@ -1,0 +1,72 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env -u PYTHONPATH -u PYTHONHOME PYTHONNOUSERSITE=1 devgod hook",
+            "timeout": 5,
+            "additionalContextLimit": 1200
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env -u PYTHONPATH -u PYTHONHOME PYTHONNOUSERSITE=1 devgod hook",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env -u PYTHONPATH -u PYTHONHOME PYTHONNOUSERSITE=1 devgod hook",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env -u PYTHONPATH -u PYTHONHOME PYTHONNOUSERSITE=1 devgod hook",
+            "timeout": 5,
+            "additionalContextLimit": 1200
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env -u PYTHONPATH -u PYTHONHOME PYTHONNOUSERSITE=1 devgod hook",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env -u PYTHONPATH -u PYTHONHOME PYTHONNOUSERSITE=1 devgod hook",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

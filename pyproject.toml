@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "devgod"
+version = "0.1.0"
+description = "A local evidence-backed engineering workflow for Codex"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "openai-codex==0.154.0",
+  "mcp==2.2.0",
+  "pydantic>=2,<3",
+]
+
+[project.scripts]
+devgod = "devgod.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.12,<1", "mypy>=1.15,<2"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/devgod"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = ["live: requires an authenticated local Codex runtime"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/devgod"]
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
