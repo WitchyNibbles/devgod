@@ -369,10 +369,46 @@ def test_codex_directory_symlink_is_inert(workspace: Workspace) -> None:
     assert (Path(candidate.snapshot_path) / stored).is_symlink()
 
 
-def test_snapshot_rejects_symlink_cycle(workspace: Workspace) -> None:
-    (workspace.root / "cycle").symlink_to("cycle")
+@pytest.mark.parametrize("links", [
+    {"cycle": "cycle"},
+    {"first": "second", "second": "first"},
+    {"cycle": "nested/back/leaf", "nested/back": "../cycle"},
+])
+def test_snapshot_rejects_symlink_cycle(workspace: Workspace, links: dict[str, str]) -> None:
+    for path, target in links.items():
+        location = workspace.root / path
+        location.parent.mkdir(parents=True, exist_ok=True)
+        location.symlink_to(target)
     with pytest.raises(WorkspaceError, match="symlink cycle"):
         workspace.snapshot()
+    assert not list((workspace.state_dir / "snapshots").iterdir())
+
+
+@pytest.mark.parametrize("links", [
+    {"dangling": "missing"},
+    {"dangling": "missing/parent/file"},
+    {"first": "second", "second": "missing/file"},
+])
+def test_snapshot_preserves_internal_dangling_links(
+    workspace: Workspace, links: dict[str, str],
+) -> None:
+    for path, target in links.items():
+        (workspace.root / path).symlink_to(target)
+    candidate = workspace.snapshot()
+    snapshot = Path(candidate.snapshot_path)
+    for path, target in links.items():
+        assert (snapshot / path).is_symlink()
+        assert os.readlink(snapshot / path) == target
+        assert not (snapshot / path).exists()
+    workspace.verify_snapshot(candidate)
+
+
+def test_snapshot_rejects_dangling_link_chain_escaping_root(workspace: Workspace) -> None:
+    (workspace.root / "first").symlink_to("second")
+    (workspace.root / "second").symlink_to("../missing/private")
+    with pytest.raises(WorkspaceError, match="symlink escapes"):
+        workspace.snapshot()
+    assert not list((workspace.state_dir / "snapshots").iterdir())
 
 
 def test_snapshot_rejects_manifest_forgery(workspace: Workspace) -> None:

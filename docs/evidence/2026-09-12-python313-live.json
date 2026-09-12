@@ -1,0 +1,85 @@
+{
+  "kind": "authenticated-production-verification",
+  "started_at": "2026-09-12T20:38:00.983508+00:00",
+  "finished_at": "2026-09-12T20:38:34.524596+00:00",
+  "implementation_mode": "scripted fixture; native implementation delegation is separate evidence",
+  "success": true,
+  "runtime": {
+    "devgod": "0.1.0",
+    "openai_codex": "0.154.0",
+    "python": "3.13.13",
+    "source_sha256": {
+      "__init__.py": "ef0fd71eafd7ab30bde5f3fdcc651d7fe1c35b52a7c3fd58858ed4f709549db3",
+      "__main__.py": "41b062115f6cc7885fa3708a0de2cf1f16dcdf58f65429758b0c0bffc46ab35e",
+      "cli.py": "767f4e26f5b86e296cc89dea24c9f786bfd41cdfcac42d576776cbab7536b884",
+      "codex_adapter.py": "bc186bc8c0c95f870601db9c51da3d0d6717690a8cd405682a4ebc7be465249e",
+      "hooks.py": "421d564d47e9f9796f368925697759d02596f8130d7cb68028d9375894c34632",
+      "install.py": "2f458db5e32180bd0adc320dace9819c30a2a7a7ac2a5e295b0ee096f0b23568",
+      "launcher.py": "98974f891ffb939224b392221a5c0e381bd8f91f0fa843c1cefd0384d58ac30e",
+      "mcp_server.py": "c7b0020427fcb3be3835359e65b8328ad7468d340444cab5bc5b4011b5dc2be2",
+      "models.py": "ab37df3ac1002a9c1e557e97dd313139256f0dc793756f14ebfe06f4f0f23c84",
+      "service.py": "c642d77b340ac860c86da9b0a11989f9bc7f5856713b57786a000cba7d63c34d",
+      "store.py": "03a4c87943fc9f5245d57cfbfd08db4389d78b36d9e912dbae9916fad5518258",
+      "verification.py": "8caceb2a4adb819510b5ce92706a6268e4b24d93be3799b418ce7cf9f6d6310d",
+      "workspace.py": "3a5f59c06daf80c38e7494985e11964c15e79ce3c6c82948c9cd77e9bb96d39d"
+    }
+  },
+  "run_id": "run_db03bb88de88425d89c4b73675ff4c12",
+  "branch": "devgod/run_db03bb88de88425d89c4b73675ff4c12",
+  "verified_gate": {
+    "candidate_digest": "f967d0ed468f73a364029e5c7f875deb720319267c8052ad18da41f31f282107",
+    "checks_digest": "7427a45d6bcbb80c9732ba4e783745409d6fcec2e25e87c4a05b3a3f7a8aa4c1",
+    "evidence_ids": [
+      "449da9c05fbb129a6f48f78c",
+      "d0bdaf4636a7bdbbc672efde",
+      "11e99a60bfca575fbb2c5bde",
+      "1da747ed5e8cf44956f02f4b"
+    ],
+    "unmet_requirements": [],
+    "verified": true
+  },
+  "stale_candidate_state": "repair",
+  "python_build": "uv-managed CPython 3.13.13",
+  "stdlib_pidfd_open": false,
+  "stdlib_pidfd_send_signal": false,
+  "process_handle_backend": "typed libc functions",
+  "raw_report_path": "/tmp/devgod-live-xkqzzqke/report.json",
+  "checks": [
+    {
+      "evidence_id": "870fc6516559c9e7c3119e02",
+      "succeeded": false,
+      "exit_code": 1
+    },
+    {
+      "evidence_id": "449da9c05fbb129a6f48f78c",
+      "succeeded": true,
+      "exit_code": 0
+    }
+  ],
+  "reviews": [
+    {
+      "role": "reviewer",
+      "thread_id": "01a09757-6ba2-7840-abc9-1b482e4a8c9a",
+      "turn_id": "01a09757-6c62-74c2-9c7e-3bd1f2103757",
+      "succeeded": true,
+      "evidence_id": "d0bdaf4636a7bdbbc672efde",
+      "decision": "approve"
+    },
+    {
+      "role": "qa_engineer",
+      "thread_id": "01a09757-6ba2-7fc1-b39d-62e8db20163a",
+      "turn_id": "01a09757-6c62-7f60-aba8-a71405305ab3",
+      "succeeded": true,
+      "evidence_id": "11e99a60bfca575fbb2c5bde",
+      "decision": "approve"
+    },
+    {
+      "role": "security_reviewer",
+      "thread_id": "01a09757-6ba2-78a1-8796-136c7adb842b",
+      "turn_id": "01a09757-6c62-7851-8a89-6f38969d3dc3",
+      "succeeded": true,
+      "evidence_id": "1da747ed5e8cf44956f02f4b",
+      "decision": "approve"
+    }
+  ]
+}

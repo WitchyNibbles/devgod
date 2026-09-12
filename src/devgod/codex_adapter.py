@@ -26,6 +26,7 @@ from tempfile import TemporaryDirectory, mkdtemp
 from typing import Any
 from uuid import uuid4
 
+from .launcher import pidfd_open, pidfd_send_signal, pidfd_supported
 from .models import (
     Candidate,
     CheckSpec,
@@ -90,13 +91,13 @@ def _same_process(actual: dict[str, Any] | None, expected: dict[str, Any]) -> bo
 def _signal_process(expected: dict[str, Any], sig: int) -> bool:
     """A pidfd prevents a recycled PID being signalled after identity validation."""
     try:
-        descriptor = os.pidfd_open(expected["pid"])
+        descriptor = pidfd_open(expected["pid"])
     except ProcessLookupError:
         return True
     try:
         if not _same_process(_read_process(expected["pid"]), expected):
             return False
-        signal.pidfd_send_signal(descriptor, sig)
+        pidfd_send_signal(descriptor, sig)
         return True
     except ProcessLookupError:
         return True
@@ -215,12 +216,7 @@ class CodexAdapter:
             version = importlib.metadata.version("openai-codex")
         except importlib.metadata.PackageNotFoundError:
             return {"available": False, "reason": "Locked Codex SDK is missing."}
-        supported_platform = (
-            sys.platform == "linux"
-            and hasattr(os, "pidfd_open")
-            and hasattr(signal, "pidfd_send_signal")
-            and Path("/proc").is_dir()
-        )
+        supported_platform = pidfd_supported()
         return {
             "available": version == SDK_VERSION and supported_platform,
             "sdk_version": version,
@@ -230,7 +226,7 @@ class CodexAdapter:
             "live_authenticated": None,
             "platform": sys.platform,
             "crash_recovery": "linux-subreaper-receipt" if supported_platform else "unsupported",
-            "measurement": "installed dependency metadata; no live invocation",
+            "measurement": "installed dependency metadata and local PID-handle probe; no live invocation",
         }
 
     def _new_invocation(
@@ -240,8 +236,8 @@ class CodexAdapter:
             raise AdapterError("Codex adapter is closed; the manager should reopen its service.")
         if invocation_id in self._active:
             raise AdapterError("This invocation is already running; inspect its existing job.")
-        if self._client_factory is None and sys.platform != "linux":
-            raise AdapterError("Managed execution requires Linux process-identity support.")
+        if self._client_factory is None and not pidfd_supported():
+            raise AdapterError("Managed execution requires usable Linux kernel PID handles.")
         if self._client_factory is None and any(
             path.resolve().is_relative_to((repo_root or cwd).resolve()) for path in _runtime_paths()
         ):

@@ -8,6 +8,7 @@ are represented by their link text, never by the contents of their targets.
 from __future__ import annotations
 
 import dataclasses
+import errno
 import hashlib
 import json
 import os
@@ -50,6 +51,30 @@ def _digest(value: Any) -> str:
 
 def _inside(path: Path, parent: Path) -> bool:
     return path == parent or parent in path.parents
+
+
+def _resolve_snapshot_link(location: Path, source_path: str) -> Path:
+    try:
+        try:
+            # Python 3.13's non-strict resolver leaves symlink loops unresolved.
+            # Probe strictly first so existing loops still fail on every runtime.
+            return location.resolve(strict=True)
+        except FileNotFoundError:
+            # Internal dangling links are valid source data; their unresolved
+            # suffix still participates in the caller's containment check.
+            return location.resolve(strict=False)
+    except RuntimeError as exc:
+        raise WorkspaceError(
+            f"Review snapshot contains a symlink cycle: {source_path!r}"
+        ) from exc
+    except OSError as exc:
+        if exc.errno == errno.ELOOP:
+            raise WorkspaceError(
+                f"Review snapshot contains a symlink cycle: {source_path!r}"
+            ) from exc
+        raise WorkspaceError(
+            f"Review snapshot symlink cannot be inspected: {source_path!r}: {exc}"
+        ) from exc
 
 
 class Workspace:
@@ -461,12 +486,7 @@ class Workspace:
                     # Strict validation also runs after all links are present.
                     link = Path(str(data))
                     logical = Path(os.path.abspath(self.root / Path(path).parent / link))
-                    try:
-                        resolved = (target.parent / link).resolve()
-                    except RuntimeError as exc:
-                        raise WorkspaceError(
-                            f"Review snapshot contains a symlink cycle: {path!r}"
-                        ) from exc
+                    resolved = _resolve_snapshot_link(target.parent / link, path)
                     if (
                         link.is_absolute()
                         or not _inside(logical, self.root)
@@ -565,12 +585,7 @@ class Workspace:
                 )
             for path, entry in copied.items():
                 if entry["kind"] == "symlink":
-                    try:
-                        resolved = (destination / relocated.get(path, path)).resolve()
-                    except RuntimeError as exc:
-                        raise WorkspaceError(
-                            f"Review snapshot contains a symlink cycle: {path!r}"
-                        ) from exc
+                    resolved = _resolve_snapshot_link(destination / relocated.get(path, path), path)
                     if not _inside(resolved, destination):
                         raise WorkspaceError(f"Review snapshot symlink escapes its root: {path!r}")
             for directory, _, _ in os.walk(destination, followlinks=False, topdown=False):

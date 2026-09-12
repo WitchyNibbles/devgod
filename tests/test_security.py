@@ -107,6 +107,7 @@ def test_runtime_receipt_stays_outside_ambient_repo_tmpdir(git_repo, tmp_path, m
 @pytest.mark.skipif(sys.platform != "linux", reason="Linux process recovery boundary")
 def test_recovery_does_not_confirm_a_detached_command_child_stopped():
     from devgod.codex_adapter import CodexAdapter, _boot_id, _read_process
+    from devgod.launcher import pidfd_open, pidfd_send_signal
 
     child_code = "import time; time.sleep(30)"
     parent_code = (
@@ -124,7 +125,7 @@ def test_recovery_does_not_confirm_a_detached_command_child_stopped():
     try:
         assert owner.stdout is not None
         child_pid = int(owner.stdout.readline().strip())
-        child_descriptor = os.pidfd_open(child_pid)
+        child_descriptor = pidfd_open(child_pid)
         identity = _read_process(owner.pid)
         assert identity is not None
         identity.pop("state")
@@ -139,7 +140,7 @@ def test_recovery_does_not_confirm_a_detached_command_child_stopped():
         owner.wait(timeout=3)
         if child_descriptor is not None:
             try:
-                signal.pidfd_send_signal(child_descriptor, signal.SIGKILL)
+                pidfd_send_signal(child_descriptor, signal.SIGKILL)
             except ProcessLookupError:
                 pass
             finally:

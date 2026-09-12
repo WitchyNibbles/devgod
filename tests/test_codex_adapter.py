@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import ctypes
+import errno
 import json
 import os
 import queue
@@ -25,6 +27,7 @@ from devgod.codex_adapter import (
     _schema,
     deny_approval,
 )
+from devgod.launcher import pidfd_open, pidfd_send_signal
 from devgod.models import Candidate, CheckSpec, Policy
 
 
@@ -503,7 +506,19 @@ def test_concurrent_reviews_have_separate_clients(candidate: Candidate) -> None:
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Linux subreaper ownership contract")
 @pytest.mark.parametrize("kill_supervisor", [False, True])
-def test_subreaper_receipt_covers_detached_children(tmp_path: Path, kill_supervisor: bool) -> None:
+@pytest.mark.parametrize("force_libc", [False, True])
+def test_subreaper_receipt_covers_detached_children(
+    tmp_path: Path, kill_supervisor: bool, force_libc: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    missing_bindings = ""
+    if force_libc:
+        monkeypatch.delattr(os, "pidfd_open", raising=False)
+        monkeypatch.delattr(signal, "pidfd_send_signal", raising=False)
+        missing_bindings = (
+            "import os,signal\n"
+            "if hasattr(os,'pidfd_open'): del os.pidfd_open\n"
+            "if hasattr(signal,'pidfd_send_signal'): del signal.pidfd_send_signal\n"
+        )
     child_code = "import time; time.sleep(30)"
     parent_code = (
         "import json,os,subprocess,sys,time; "
@@ -515,7 +530,8 @@ def test_subreaper_receipt_covers_detached_children(tmp_path: Path, kill_supervi
     nonce = "c" * 32
     supervisor = tmp_path / "supervisor.py"
     supervisor.write_text(
-        "import sys\nfrom pathlib import Path\nfrom devgod.launcher import supervise\n"
+        missing_bindings
+        + "import sys\nfrom pathlib import Path\nfrom devgod.launcher import supervise\n"
         f"raise SystemExit(supervise([sys.executable,'-I','-c',{parent_code!r}],Path({str(receipt_dir)!r}),{nonce!r}))\n"
     )
     owner = subprocess.Popen(
@@ -524,9 +540,12 @@ def test_subreaper_receipt_covers_detached_children(tmp_path: Path, kill_supervi
         text=True,
     )
     children: dict[str, int] = {}
+    child_handles: list[int] = []
     try:
         assert owner.stdout is not None
         children = json.loads(owner.stdout.readline())
+        for pid in children.values():
+            child_handles.append(pidfd_open(pid))
         identity = _read_process(owner.pid)
         assert identity is not None
         identity.pop("state")
@@ -552,11 +571,13 @@ def test_subreaper_receipt_covers_detached_children(tmp_path: Path, kill_supervi
         if owner.poll() is None:
             owner.kill()
             owner.wait(timeout=3)
-        for pid in children.values():
+        for descriptor in child_handles:
             try:
-                os.kill(pid, signal.SIGKILL)
+                pidfd_send_signal(descriptor, signal.SIGKILL)
             except ProcessLookupError:
                 pass
+            finally:
+                os.close(descriptor)
 
 
 def test_recovery_rejects_pid_reuse_without_signalling(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -739,10 +760,13 @@ def test_supervisor_reaps_detached_children_after_its_parent_dies(tmp_path: Path
         [sys.executable, "-I", "-c", parent_code], stdout=subprocess.PIPE, text=True
     )
     processes: dict[str, int] = {}
+    process_handles: list[int] = []
     try:
         assert parent.stdout is not None
         processes.update(json.loads(parent.stdout.readline()))
         processes.update(json.loads(parent.stdout.readline()))
+        for pid in processes.values():
+            process_handles.append(pidfd_open(pid))
         identity = _read_process(processes["supervisor"])
         assert identity is not None
         identity.pop("state")
@@ -765,8 +789,133 @@ def test_supervisor_reaps_detached_children_after_its_parent_dies(tmp_path: Path
         if parent.poll() is None:
             parent.kill()
         parent.wait(timeout=3)
-        for pid in processes.values():
+        for descriptor in process_handles:
             try:
-                os.kill(pid, signal.SIGKILL)
+                pidfd_send_signal(descriptor, signal.SIGKILL)
             except ProcessLookupError:
                 pass
+            finally:
+                os.close(descriptor)
+
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux kernel PID handles")
+@pytest.mark.parametrize("missing", [(), ("open",), ("open", "signal")])
+def test_pid_handles_remain_available_without_optional_python_bindings(
+    monkeypatch: pytest.MonkeyPatch, missing: tuple[str, ...]
+) -> None:
+    from devgod.launcher import pidfd_open, pidfd_send_signal, pidfd_supported
+
+    if "open" in missing:
+        monkeypatch.delattr(os, "pidfd_open", raising=False)
+    if "signal" in missing:
+        monkeypatch.delattr(signal, "pidfd_send_signal", raising=False)
+    assert pidfd_supported()
+    descriptor = pidfd_open(os.getpid())
+    try:
+        assert not os.get_inheritable(descriptor)
+        pidfd_send_signal(descriptor, 0)
+    finally:
+        os.close(descriptor)
+    with pytest.raises(OSError) as raised:
+        pidfd_send_signal(descriptor, 0)
+    assert raised.value.errno == errno.EBADF
+    capabilities = asyncio.run(CodexAdapter().capabilities())
+    assert capabilities["available"]
+    assert capabilities["crash_recovery"] == "linux-subreaper-receipt"
+
+
+def test_pid_handle_native_bindings_take_precedence(monkeypatch: pytest.MonkeyPatch) -> None:
+    import devgod.launcher as module
+
+    calls: list[tuple[Any, ...]] = []
+
+    def native_open(pid: int, flags: int) -> int:
+        calls.append(("open", pid, flags))
+        return 91
+
+    def fallback_forbidden(*args: Any) -> Any:
+        raise AssertionError("native binding must not try libc fallback")
+
+    monkeypatch.setattr(os, "pidfd_open", native_open, raising=False)
+    monkeypatch.setattr(
+        signal,
+        "pidfd_send_signal",
+        lambda fd, sig: calls.append(("signal", fd, sig)),
+        raising=False,
+    )
+    monkeypatch.setattr(module, "_libc_function", fallback_forbidden)
+    assert module.pidfd_open(123) == 91
+    module.pidfd_send_signal(91, 0)
+    assert calls == [("open", 123, 0), ("signal", 91, 0)]
+
+
+@pytest.mark.parametrize("error", [errno.ENOSYS, errno.EPERM, errno.ESRCH])
+@pytest.mark.parametrize("operation", ["open", "signal"])
+def test_pid_handle_libc_preserves_kernel_errors(
+    monkeypatch: pytest.MonkeyPatch, error: int, operation: str
+) -> None:
+    import devgod.launcher as module
+
+    monkeypatch.delattr(os, "pidfd_open", raising=False)
+    monkeypatch.delattr(signal, "pidfd_send_signal", raising=False)
+
+    def fail(*args: Any) -> int:
+        ctypes.set_errno(error)
+        return -1
+
+    monkeypatch.setattr(module, "_libc_function", lambda *args: fail)
+    with pytest.raises(OSError) as raised:
+        if operation == "open":
+            module.pidfd_open(123)
+        else:
+            module.pidfd_send_signal(91, 0)
+    assert raised.value.errno == error
+
+
+def test_pid_handle_probe_fails_closed_when_libc_symbols_are_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import devgod.launcher as module
+
+    monkeypatch.delattr(os, "pidfd_open", raising=False)
+    monkeypatch.delattr(signal, "pidfd_send_signal", raising=False)
+    monkeypatch.setattr(ctypes, "CDLL", lambda *args, **kwargs: object())
+    assert not module.pidfd_supported()
+
+
+def test_pid_handle_probe_does_not_retry_denied_native_binding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import devgod.launcher as module
+
+    def denied(*args: Any) -> Any:
+        raise PermissionError(errno.EPERM, "probe denied")
+
+    def fallback_forbidden(*args: Any) -> Any:
+        raise AssertionError("a denied syscall must not try an alternative")
+
+    monkeypatch.setattr(os, "pidfd_open", denied, raising=False)
+    monkeypatch.setattr(module, "_libc_function", fallback_forbidden)
+    assert not module.pidfd_supported()
+
+
+def test_missing_kernel_handles_prevent_managed_child_start(
+    candidate: Candidate, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import devgod.codex_adapter as adapter_module
+    import devgod.launcher as launcher_module
+
+    def forbidden(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("must not reach runtime or subprocess launch")
+
+    monkeypatch.setattr(adapter_module, "pidfd_supported", lambda: False)
+    monkeypatch.setattr(adapter_module, "_runtime_paths", forbidden)
+    monkeypatch.setattr(launcher_module, "pidfd_supported", lambda: False)
+    monkeypatch.setattr(subprocess, "Popen", forbidden)
+    with pytest.raises(AdapterError, match="kernel PID handles"):
+        CodexAdapter()._new_invocation("test", "command", Path(candidate.repo_root))
+    with pytest.raises(OSError, match="Kernel PID handles"):
+        launcher_module.supervise(["unused"], tmp_path, "a" * 32)
+    capabilities = asyncio.run(CodexAdapter().capabilities())
+    assert not capabilities["available"]
+    assert capabilities["crash_recovery"] == "unsupported"

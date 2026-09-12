@@ -6,7 +6,7 @@ This record distinguishes actual Codex execution, native conversation behavior, 
 
 The blocking command is `bash scripts/check.sh`: Ruff over source, tests, and scripts; mypy over product modules; and the complete non-live pytest suite. CI runs the same checks on Linux with Python 3.12 and 3.13 and builds the distribution. Local execution uses Python 3.12.3, `openai-codex` and its bundled runtime 0.154.0, and MCP 2.2.0.
 
-Final local result: **212 tests passed in 32.05 seconds**, Ruff passed, and mypy passed over all 13 product modules. This includes 12 additional regressions for native-test configuration isolation, credential cleanup, and process classification. CI is configured; a remote CI run is not claimed.
+Final local results: **233 tests passed on both Python 3.12.3 and uv-managed Python 3.13.13**, in 35.21 and 32.78 seconds respectively. Ruff and mypy passed on both; product modules remain 13. This includes native-test isolation and process classification regressions, plus PID-handle compatibility and symlink-cycle cases. The first remote CI run exposed the Python 3.13 issues now corrected; [compatibility evidence](evidence/2026-09-12-python-compatibility.json) records the failure, fixes, and local validation. Current remote results are available in [GitHub Actions](https://github.com/WitchyNibbles/devgod/actions/workflows/ci.yml).
 
 The suite exercises:
 
@@ -29,7 +29,7 @@ Simulated reviewer payloads test gate behavior; they are not described as live i
 
 The production service smoke uses `Workspace`, `Store`, `DevGodService`, `VerificationRunner`, and `CodexAdapter` directly. The fixture implementation is scripted. Its first arithmetic check really fails; after repair, a fresh sandboxed check and three actual independent Codex sessions approve the candidate. The public kernel reaches `verified`, and a subsequent source edit returns it to `repair`.
 
-The final successful integrated run was `run_4740b70c153743e9818c252e7d0ebd61`, with branch `devgod/run_4740b70c153743e9818c252e7d0ebd61`. It completed in 32.76 seconds, and its recorded source hashes match the frozen runtime. Reviewer thread IDs were:
+The initial successful integrated run was `run_4740b70c153743e9818c252e7d0ebd61`, with branch `devgod/run_4740b70c153743e9818c252e7d0ebd61`. It completed in 32.76 seconds, and its recorded source hashes identify the runtime before the Python compatibility correction. Reviewer thread IDs were:
 
 - Code review: `01a096fb-9dfd-79f3-afa3-9dc57877a622`.
 - QA: `01a096fb-9e04-7840-ae36-0ec6844cdc28`.
@@ -39,10 +39,12 @@ The checked candidate digest was `93c6858dbbf68049af991efe09ad844ba99f6f548a8306
 
 The separate implemented-adapter smoke also passed after adding the subreaper supervisor: an actual command returned exit code 0 and a structured reviewer approved its observed result, thread `01a096f5-d387-7290-8dbb-b19761b7b747`. The [SDK spike report](research/2026-09-12-sdk-spike.md) documents protocol details and clearly labels its placeholder candidate digests as adapter-only evidence.
 
+The final compatibility run, `run_db03bb88de88425d89c4b73675ff4c12`, passed on uv-managed Python 3.13.13 with both optional Python PID-handle bindings absent. Typed libc calls supplied the same kernel operations. A real failed check, repair, fresh successful check, three independent approvals, verified gate, and source-mutation invalidation all completed. [Retained Python 3.13 live evidence](evidence/2026-09-12-python313-live.json) identifies the current source hashes, check results, and reviewer sessions.
+
 Reproduce complete service verification with:
 
 ```sh
-uv run --locked python scripts/live_smoke.py
+uv run --locked python scripts/live_smoke.py --allow-live
 ```
 
 It uses local Codex authentication and model quota, retains a report in its temporary fixture directory, and records the tested runtime source fingerprints. It is not part of ordinary CI.
@@ -53,13 +55,13 @@ The native test installs the built wheel in an isolated environment, creates a f
 
 The first run exposed an integration defect: `auto` approval mode permitted bookkeeping but blocked `verify`. Codex correctly reported the work incomplete. Explicit approval of the known DevGod tools fixed this; a second run completed native planning, both implementation specialists, checks, and all three reviews without an approval request.
 
-The earlier successful native delivery used the same wheel hash as the passing package smoke and completed in 291.00 seconds. Manager thread `01a096fc-41f4-7351-9ca8-93aa535b7be4` started an actual native planner and two implementation specialists. Both dependent tasks reached `verified` on branch `devgod/run_8f31087c2bfe413daf6032cc5e444748`. The accepted command passed all 11 fixture regression tests, and all three independent review jobs approved the current candidate. There were 17 MCP calls, zero approval callbacks, and zero MCP approval-policy errors. The manager corrected one task-role schema error itself.
+The earlier successful native delivery used the wheel identified in its retained report and completed in 291.00 seconds. Manager thread `01a096fc-41f4-7351-9ca8-93aa535b7be4` started an actual native planner and two implementation specialists. Both dependent tasks reached `verified` on branch `devgod/run_8f31087c2bfe413daf6032cc5e444748`. The accepted command passed all 11 fixture regression tests, and all three independent review jobs approved the current candidate. There were 17 MCP calls, zero approval callbacks, and zero MCP approval-policy errors. The manager corrected one task-role schema error itself.
 
 The test supplies the generated repository MCP configuration through the supported app-server test-client configuration. The pinned runtime registers project trust during thread initialization; the corrected test confines that registration to a disposable Codex home. It does not grant hook trust, exercise the graphical app, or establish first-use UI behavior. Actual hook payload and continuation behavior is tested separately.
 
 The earlier wrapper's shared-configuration assertion failed because app-server persisted a project-trust entry for the temporary consuming repository. Removing only that 75-byte entry in memory reproduces the recorded original hash exactly. An isolated reproduction then traced the app-server worker's file write and atomic rename between `initialize` and `thread/start`, before any model turn. Shared configuration remained unchanged during this reproduction. Independent historical tool-call review agrees with this attribution. The previous unexplained-host-activity hypothesis is superseded; see the [cause investigation](research/2026-09-12-config-write.md) and [retained syscall evidence](evidence/2026-09-12-config-write.json).
 
-The [original native evidence](evidence/2026-09-12-native.json) retains its actual `delivery_status: passed` and `wrapper_status: failed` with the resolved attribution. The corrected test uses private settings and authentication files, checks shared configuration and authentication hashes, and removes private credential material on exit. Production modules and the tested wheel are unchanged.
+The [original native evidence](evidence/2026-09-12-native.json) retains its actual `delivery_status: passed` and `wrapper_status: failed` with the resolved attribution. The corrected test uses private settings and authentication files, checks shared configuration and authentication hashes, and removes private credential material on exit. That native-test correction left production modules unchanged; the subsequent Python compatibility correction is covered by the later service and package evidence.
 
 The isolated native rerun completed delivery in **283.52 seconds**, thread `01a0973a-427b-73f1-adfa-f03a840bc5d1`, on branch `devgod/run_63bb5cc6455c4594a19ce6a6fe910b76`. Three native children, both dependent tasks, the accepted check, and all three independent reviews completed successfully. There were 17 MCP calls and zero approval requests or approval-policy errors. Both shared `config.toml` and `auth.json` remained byte-identical. Project trust was recorded only in the private home, and that home and its credential copies were removed.
 
@@ -75,7 +77,7 @@ Run the native smoke from the isolated wheel environment produced by the package
 
 `scripts/package_smoke.py` builds a wheel and source archive, checks hidden plugin/MCP files and manager skill assets, installs the wheel into a fresh temporary environment, and imports it without the checkout on `sys.path`. It verifies setup, diagnostics, byte-idempotent reinstallation, and removal while preserving existing user instructions and configuration. README metadata and the isolated launcher are also checked.
 
-The final package smoke passed using wheel SHA-256 `a39f98248167df81f06774887401684cae9cc8f2bd1b682738c919120d74c235`. [Retained packaging evidence](evidence/2026-09-12-package.json) records the checks and external import location.
+The final compatibility package smoke passed using wheel SHA-256 `7d2c38a2a941927839e126379ee8f13f4e6265ff3dfc28d7d25094a72533283f`. [Retained compatibility evidence](evidence/2026-09-12-python-compatibility.json) records its installation checks and external import location. The [original package evidence](evidence/2026-09-12-package.json) remains available for the preceding native runs.
 
 ```sh
 uv run --locked python scripts/package_smoke.py --online

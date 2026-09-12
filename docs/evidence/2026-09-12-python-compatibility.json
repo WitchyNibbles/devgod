@@ -1,0 +1,80 @@
+{
+  "date": "2026-09-12",
+  "initial_ci_run": "https://github.com/WitchyNibbles/devgod/actions/runs/34717294270",
+  "initial_commit": "d3a75741ec5e927777d1d0c1eea755a8e25af58e",
+  "initial_result": {
+    "python312": "passed",
+    "python313": "failed: missing optional PID-handle bindings and changed non-strict symlink resolution"
+  },
+  "fixed_local_matrix": [
+    {
+      "python": "3.12.3",
+      "tests_passed": 233,
+      "duration_seconds": 35.21,
+      "ruff": "passed",
+      "mypy": "passed"
+    },
+    {
+      "python": "3.13.13 uv-managed, without either optional stdlib PID-handle binding",
+      "tests_passed": 233,
+      "duration_seconds": 32.78,
+      "ruff": "passed",
+      "mypy": "passed"
+    }
+  ],
+  "final_adapter_security_checks": [
+    {
+      "python": "3.12.3",
+      "passed": 68,
+      "duration_seconds": 4.92
+    },
+    {
+      "python": "3.13.13 uv-managed",
+      "passed": 68,
+      "duration_seconds": 4.59
+    }
+  ],
+  "independent_security": {
+    "result": "passed",
+    "pid_handle_tests_passed": 13,
+    "workspace_tests_passed": 34,
+    "tests_skipped": 0,
+    "remaining_blockers": []
+  },
+  "live_execution": "2026-09-12-python313-live.json",
+  "package_report_path": "/tmp/devgod-package-g7mvzo5k/report.json",
+  "current_ci": "https://github.com/WitchyNibbles/devgod/actions/workflows/ci.yml",
+  "package": {
+    "scope": "built distribution and installation, no live model execution",
+    "status": "passed",
+    "artifacts": {
+      "wheel": "/tmp/devgod-package-g7mvzo5k/dist/devgod-0.1.0-py3-none-any.whl",
+      "sdist": "/tmp/devgod-package-g7mvzo5k/dist/devgod-0.1.0.tar.gz",
+      "wheel_sha256": "7d2c38a2a941927839e126379ee8f13f4e6265ff3dfc28d7d25094a72533283f",
+      "required_assets": [
+        "devgod/assets/devgod/.codex-plugin/plugin.json",
+        "devgod/assets/devgod/.mcp.json",
+        "devgod/assets/devgod/hooks/hooks.json",
+        "devgod/assets/devgod/skills/devgod-manager/SKILL.md",
+        "devgod/assets/devgod/skills/devgod-manager/agents/openai.yaml",
+        "devgod/assets/agents-block.md"
+      ]
+    },
+    "import_location": "/tmp/devgod-package-g7mvzo5k/venv/lib/python3.12/site-packages/devgod/__init__.py",
+    "original_files_preserved": true,
+    "hook_trust_granted": false,
+    "doctor_runtime": {
+      "available": true,
+      "command_protocol": "command/exec",
+      "crash_recovery": "linux-subreaper-receipt",
+      "expected_sdk_version": "0.154.0",
+      "live_authenticated": null,
+      "mcp": "2.2.0",
+      "measurement": "installed dependency metadata and local PID-handle probe; no live invocation",
+      "platform": "linux",
+      "python": "3.12.3",
+      "sdk_version": "0.154.0",
+      "structured_reviews": true
+    }
+  }
+}

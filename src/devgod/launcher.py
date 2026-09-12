@@ -7,6 +7,7 @@ stdio and stays alive until all descendants, including detached ones, are reaped
 from __future__ import annotations
 
 import ctypes
+import errno
 import importlib.metadata
 import json
 import os
@@ -14,7 +15,69 @@ import signal
 import subprocess
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
+from typing import cast
+
+
+def _libc_function(
+    name: str, argument_types: list[type[ctypes._SimpleCData]]
+) -> Callable[..., int]:
+    try:
+        function = getattr(ctypes.CDLL(None, use_errno=True), name)
+    except AttributeError as exc:
+        raise OSError(errno.ENOSYS, "Kernel PID handles are unavailable in this runtime.") from exc
+    function.argtypes = argument_types
+    function.restype = ctypes.c_int
+    return cast(Callable[..., int], function)
+
+
+def pidfd_open(pid: int) -> int:
+    """Open a kernel PID handle even when Python omitted its optional binding."""
+    if not isinstance(pid, int) or not 0 < pid <= 2**31 - 1:
+        raise ValueError("PID must be a positive signed 32-bit integer.")
+    native = getattr(os, "pidfd_open", None)
+    if native is not None:
+        return int(native(pid, 0))
+    function = _libc_function("pidfd_open", [ctypes.c_int, ctypes.c_uint])
+    descriptor = function(pid, 0)
+    if descriptor < 0:
+        error = ctypes.get_errno() or errno.EIO
+        raise OSError(error, os.strerror(error))
+    return int(descriptor)
+
+
+def pidfd_send_signal(descriptor: int, sig: int) -> None:
+    """Signal only the process bound to a kernel handle, never a numeric PID."""
+    if not isinstance(descriptor, int) or not 0 <= descriptor <= 2**31 - 1:
+        raise ValueError("PID handle must be a nonnegative signed 32-bit integer.")
+    if not isinstance(sig, int) or not 0 <= sig <= 2**31 - 1:
+        raise ValueError("Signal must be a nonnegative signed 32-bit integer.")
+    native = getattr(signal, "pidfd_send_signal", None)
+    if native is not None:
+        native(descriptor, sig)
+        return
+    function = _libc_function(
+        "pidfd_send_signal", [ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_uint]
+    )
+    if function(descriptor, sig, None, 0) < 0:
+        error = ctypes.get_errno() or errno.EIO
+        raise OSError(error, os.strerror(error))
+
+
+def pidfd_supported() -> bool:
+    """Probe actual kernel/runtime access without delivering a process signal."""
+    if sys.platform != "linux" or not Path("/proc").is_dir():
+        return False
+    try:
+        descriptor = pidfd_open(os.getpid())
+        try:
+            pidfd_send_signal(descriptor, 0)
+        finally:
+            os.close(descriptor)
+    except OSError:
+        return False
+    return True
 
 
 def _birth(pid: int) -> int | None:
@@ -35,13 +98,13 @@ def _kill_children() -> None:
     while True:
         for pid in _children():
             try:
-                descriptor = os.pidfd_open(pid)
+                descriptor = pidfd_open(pid)
             except ProcessLookupError:
                 continue
             try:
                 stat = Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()
                 if int(stat[1]) == os.getpid():
-                    signal.pidfd_send_signal(descriptor, signal.SIGKILL)
+                    pidfd_send_signal(descriptor, signal.SIGKILL)
             except (FileNotFoundError, ProcessLookupError):
                 pass
             finally:
@@ -56,6 +119,8 @@ def _kill_children() -> None:
 
 def supervise(command: list[str], receipt_dir: Path, nonce: str) -> int:
     """Internal supervisor primitive; the executable entry fixes the command."""
+    if not pidfd_supported():
+        raise OSError(errno.ENOSYS, "Kernel PID handles are unavailable for managed execution.")
     stop_requested = False
 
     def request_stop(_signal: int, _frame: object) -> None:

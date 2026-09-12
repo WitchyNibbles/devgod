@@ -122,3 +122,7 @@ Implementation is complete only with evidence for:
 - An authenticated production-adapter smoke run, reported separately from simulated fault tests.
 
 Before freezing the integration, the capability spike must prove SDK authentication/model inheritance; sandboxed `command/exec`; read-only structured review; reviewer recursion suppression; supported MCP job lifetime; and hook trust/continuation behavior. Unsupported behavior must be corrected or explicitly narrowed in the design, never hidden behind synthetic passing records. Independent correctness, QA, and security reviews remain blocking release gates.
+
+## Python build compatibility
+
+Linux process ownership uses Python PID-handle bindings when available, with typed libc calls when a Python build omits those optional bindings. Diagnostics and dispatch probe actual handle operations; unavailable or denied operations stop execution before child dispatch. Descriptor-based signalling, process identity checks, and descendant reaping remain required. Snapshot validation resolves symlinks strictly to detect cycles consistently on Python 3.12 and 3.13, while preserving internal dangling links and containment checks.
