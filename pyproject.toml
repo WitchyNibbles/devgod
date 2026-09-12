@@ -7,12 +7,19 @@ name = "devgod"
 version = "0.1.0"
 description = "A local evidence-backed engineering workflow for Codex"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
   "openai-codex==0.154.0",
   "mcp==2.2.0",
   "pydantic>=2,<3",
 ]
+
+[project.urls]
+Repository = "https://github.com/WitchyNibbles/devgod"
+Documentation = "https://github.com/WitchyNibbles/devgod/tree/main/docs"
+Issues = "https://github.com/WitchyNibbles/devgod/issues"
 
 [project.scripts]
 devgod = "devgod.cli:main"

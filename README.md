@@ -1,36 +1,74 @@
-# DevGod
+<!-- A little witchcraft in the README. Evidence in the workflow. -->
 
-DevGod adds an autonomous engineering workflow to the Codex app and CLI. You describe the work and resolve design questions in your normal conversation. Codex delegates implementation; DevGod saves progress, runs checks, launches independent reviews, and returns findings for repair. The finish line is a verified local branch ready for your review.
+<div align="center">
 
-The replacement is designed around the failures of the original harness: repeated permission requests, missing reviewer execution, and internal bookkeeping that became manual work for the user. Routine task tracking, checkpoints, review dispatch, and recovery happen through tools in the conversation.
+<img src="docs/assets/devgod-logo.png" width="220" height="220" alt="DevGod emblem: an ivory candle between code brackets, beneath a golden crescent moon on a dark plum seal" />
 
-## Architecture
+<h1>DevGod</h1>
 
-Codex owns the manager conversation and native implementation specialists. A local Python MCP service owns transactional SQLite state and verification. There is no database server to operate and no separate daily interface.
+<p><em>Summon the agents. Keep the receipts.</em></p>
 
-The service runs configured checks through Codex's sandboxed command interface. It launches separate code-review, QA, and security sessions against a frozen candidate. Passing results identify the candidate they assessed; edits invalidate stale evidence. A worker's completion message cannot mark a run verified.
+<p>Autonomous engineering for your existing Codex app and CLI.</p>
 
-See the [design](docs/design.md), [implementation plan](docs/implementation-plan.md), and [research as of September 12, 2026](docs/research/2026-09-12-codex-platform.md). The [original-project investigation](docs/research/2026-09-12-original-project.md) records the observed legacy failures.
+[![Verify](https://github.com/WitchyNibbles/devgod/actions/workflows/ci.yml/badge.svg)](https://github.com/WitchyNibbles/devgod/actions/workflows/ci.yml) [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-b69a62?style=flat-square&labelColor=17121f)](pyproject.toml) [![Linux](https://img.shields.io/badge/platform-Linux-9b88b0?style=flat-square&labelColor=17121f)](docs/operations.md) [![MIT license](https://img.shields.io/badge/license-MIT-b74353?style=flat-square&labelColor=17121f)](LICENSE)
 
-## Install in a consuming repository
+[The grimoire](docs/design.md) · [Field notes](docs/operations.md) · [Verification record](docs/verification.md)
 
-Requirements: Linux, Python 3.12+, an existing Git repository with an initial commit, [uv](https://docs.astral.sh/uv/), and an authenticated Codex installation. Managed execution uses Linux process supervision. The package pins the Python Codex SDK and compatible runtime to 0.154.0.
+</div>
 
-From this checkout:
+---
+
+## 🖤 What it does
+
+DevGod gives Codex a persistent engineering workflow inside the conversation you already use. Describe the work, settle the design, and let the manager delegate implementation, run checks, dispatch independent reviews, and repair failures.
+
+**The finish line: an implemented, verified local branch, ready for your review.**
+
+The original harness had a habit of turning its own limitations into chores: repeated permission requests, missing reviewer execution, and manual bookkeeping. This rebuild puts routine task tracking, checkpoints, review dispatch, and recovery behind tools the agents operate themselves.
+
+## 🌙 The ritual
+
+| Step | What happens |
+| --- | --- |
+| **Set the intention** | You and Codex agree on the design, acceptance criteria, and scope. |
+| **Summon the specialists** | Native Codex agents implement the work across planned tasks. |
+| **Test the spell** | DevGod runs configured checks and separate code, QA, and security reviews. Findings return to the manager for repair. |
+| **Bring it into the light** | Fresh evidence supports the current candidate; the local branch is ready for you to review. |
+
+A worker saying “done” cannot mark a run verified. Checks and reviews identify the source snapshot they assessed, and later edits invalidate stale evidence.
+
+## 🕯️ Installation
+
+Bring these to the circle:
+
+- **Linux** and **Python 3.12+**. Managed execution uses Linux process supervision.
+- [**uv**](https://docs.astral.sh/uv/) and an **authenticated Codex installation**.
+- A consuming **Git repository with an initial commit**.
+
+Clone DevGod and install it in a separate tool environment:
 
 ```sh
+git clone https://github.com/WitchyNibbles/devgod.git
+cd devgod
 uv tool install --python 3.12 .
+```
+
+Connect your project, replacing the path below with its absolute path:
+
+```sh
 devgod --repo /absolute/path/to/your-project init
 devgod --repo /absolute/path/to/your-project doctor
 ```
 
-Open or reconnect that project in Codex to load the integration. Codex controls project trust and trust for each exact hook definition; review initial or changed hooks through `/hooks` in the CLI. DevGod cannot grant that trust. The manager skill and MCP workflow work independently of optional lifecycle hooks. `doctor` checks installation and dependency metadata; it does not claim a successful authenticated model invocation.
+Open or reconnect that project in Codex to load the integration. Codex controls project trust and trust for each exact hook definition; review initial or changed hooks through `/hooks` in the CLI. DevGod cannot grant that trust. The manager skill and MCP workflow work independently of optional lifecycle hooks.
 
 Setup preserves existing instructions and configuration. It adds a small managed `AGENTS.md` section, a manager skill, a project MCP entry, lifecycle hooks, and an ownership manifest. Automatic tool approval is scoped to the DevGod MCP entry. Global Codex permissions remain under your control.
 
-## Use it in Codex
+`doctor` checks installation, dependency metadata, and local capabilities; it does not claim a successful authenticated model invocation. The package pins the Python Codex SDK and compatible runtime to **0.154.0**.
 
-Start with an ordinary request:
+## 🗝️ Your everyday spellbook
+
+Keep talking to Codex as usual:
 
 > Use DevGod to fix invoice rounding. Clarify the design with me, then implement and verify the complete change on a local branch ready for review.
 
@@ -40,13 +78,13 @@ The manager records acceptance criteria, task scopes and dependencies, and actua
 
 You do not write action JSON, review receipts, checkpoints, or queue transitions. Progress and findings stay in the Codex conversation. Separate SDK review sessions appear in DevGod status; they are distinct from native implementation subagents.
 
-The finish line is an implemented, verified local branch. Starting work preserves existing staged, unstaged, and untracked changes. DevGod does not automatically commit, publish a pull request, merge, or deploy.
+Starting work preserves existing staged, unstaged, and untracked changes. DevGod finishes on a local branch; it does not automatically commit, publish a pull request, merge, or deploy.
 
-## Resume, migrate, and update
+## 🕸️ Pick up the thread
 
-Say “Resume the DevGod task.” The manager restores the checkpoint and inspects interrupted work before retrying it. Closing Codex may stop execution; saved state supports recovery when it reopens.
+Say **“Resume the DevGod task.”** The manager restores the checkpoint and inspects interrupted work before retrying it. Closing Codex may stop execution; saved state supports recovery when it reopens.
 
-These commands are available for diagnostics:
+For diagnostics:
 
 ```sh
 devgod --repo /absolute/path/to/your-project status
@@ -54,11 +92,32 @@ devgod --repo /absolute/path/to/your-project next
 devgod --repo /absolute/path/to/your-project resume
 ```
 
-For an old DevGod installation, use `init --migrate`. It archives and disables recognizable legacy controls while preserving user modifications and historical data. Update with `uv tool install --reinstall /path/to/devgod-recovery`, then rerun `init`. `uninstall` removes identifiable owned integration and retains delivery work and private history.
+**Migrating an old installation?** Use `init --migrate`. It archives and disables recognizable legacy controls while preserving user modifications and historical data.
 
-See [operation and migration details](docs/operations.md) for paths, commands, recovery, and execution boundaries.
+**Updating?** Pull the latest version into your DevGod checkout, reinstall it, and rerun `init` for each consuming project:
 
-## Development and verification
+```sh
+git -C /absolute/path/to/devgod pull --ff-only
+uv tool install --reinstall /absolute/path/to/devgod
+devgod --repo /absolute/path/to/your-project init
+```
+
+`uninstall` removes identifiable owned integration and retains delivery work and private history. The [operations guide](docs/operations.md) covers paths, commands, recovery, and execution boundaries.
+
+## 🔮 Inside the grimoire
+
+Codex owns the manager conversation and native implementation specialists. A local Python MCP service owns transactional SQLite state and verification. There is no database server to operate and no separate daily interface.
+
+The service runs configured checks through Codex's sandboxed command interface. Independent code-review, QA, and security sessions assess a frozen candidate. Verification stays tied to the candidate that earned it.
+
+- [Design](docs/design.md) — architecture, autonomy, and delivery rules.
+- [Implementation plan](docs/implementation-plan.md) — the components and their responsibilities.
+- [Platform research · September 12, 2026](docs/research/2026-09-12-codex-platform.md) — the evidence behind the design.
+- [Original-project investigation](docs/research/2026-09-12-original-project.md) — a record of the old haunting.
+
+## ⚗️ Development & contributions
+
+From your DevGod checkout:
 
 ```sh
 uv sync --locked
@@ -67,3 +126,17 @@ uv build --no-sources
 ```
 
 The blocking development gate runs Ruff, mypy, and the non-live tests. The [verification record](docs/verification.md) separates simulated failure tests from authenticated live execution. Live smoke scripts are opt-in: they require local Codex authentication and use model quota. They are excluded from ordinary CI.
+
+Bug reports and contributions are welcome. [Open an issue](https://github.com/WitchyNibbles/devgod/issues) with the behavior you expected and steps to reproduce, or send a pull request with a focused change and its verification results. Keep credentials and private project data out of reports.
+
+## 📜 License
+
+[MIT](LICENSE) · Copyright (c) 2026 Eimi (WitchyNibbles).
+
+---
+
+<div align="center">
+
+🕯️ <em>The code may be haunted. The checks should pass.</em> 🕯️
+
+</div>
