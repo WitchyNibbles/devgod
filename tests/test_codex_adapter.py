@@ -217,6 +217,30 @@ def test_no_approval_path_accepts_privileges() -> None:
         deny_approval("unknown/approval", {})
 
 
+def test_review_schema_uses_the_portable_strict_output_subset() -> None:
+    """Fine-tuned review providers reject Pydantic's array/string constraints."""
+    schema = _schema()
+    forbidden = {
+        "default", "title", "description", "minLength", "maxLength", "pattern", "format",
+        "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf",
+        "minItems", "maxItems", "patternProperties",
+    }
+
+    def visit(node: Any) -> None:
+        if isinstance(node, dict):
+            assert not forbidden.intersection(node)
+            if node.get("type") == "object" and "properties" in node:
+                assert node["additionalProperties"] is False
+                assert set(node["required"]) == set(node["properties"])
+            for value in node.values():
+                visit(value)
+        elif isinstance(node, list):
+            for value in node:
+                visit(value)
+
+    visit(schema)
+
+
 def test_command_streams_under_explicit_sandbox_and_preserves_identity(
     candidate: Candidate,
 ) -> None:

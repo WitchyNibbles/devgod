@@ -149,12 +149,42 @@ def _plain(value: Any) -> Any:
 
 
 def _schema() -> dict[str, Any]:
-    """Codex structured output requires every property, including nullable ones."""
+    """Return the portable strict-output subset of the local review schema.
+
+    Pydantic emits useful local validation constraints (for example ``maxItems``
+    and ``pattern`` for ``acceptance_ids``), but the Codex provider can route a
+    review to a fine-tuned model whose strict structured-output subset rejects
+    those type-specific keywords.  Keep those constraints when validating the
+    returned payload locally; omit them only from the provider-facing schema.
+    """
     schema = ReviewPayload.model_json_schema()
+
+    # The intersection accepted by standard and fine-tuned strict-output
+    # providers.  Objects, enums, arrays, nullable ``anyOf`` values, and refs
+    # remain intact; ReviewPayload.model_validate is the authoritative bounded
+    # validator after the provider responds.
+    unsupported = {
+        "default",
+        "title",
+        "description",
+        "minLength",
+        "maxLength",
+        "pattern",
+        "format",
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "minItems",
+        "maxItems",
+        "patternProperties",
+    }
 
     def visit(node: Any) -> None:
         if isinstance(node, dict):
-            node.pop("default", None)
+            for key in unsupported:
+                node.pop(key, None)
             if node.get("type") == "object" and "properties" in node:
                 node["required"] = list(node["properties"])
                 node["additionalProperties"] = False
