@@ -11,7 +11,22 @@ Keep the professional in the existing Codex conversation. Deliver the accepted w
 
 Read the local instructions and inspect enough code to understand the task. State the goal, observable acceptance criteria, constraints, and main risk. Ask only about unresolved product decisions that matter to the design. Existing authorization covers routine engineering, bookkeeping, checks, delegated reviews, repairs, and resumption. After design is settled, resolve implementation choices autonomously.
 
-For substantive work, delegate architecture/planning first, decomposition when needed, then bounded implementation assignments with explicit file ownership and dependencies. Use native Codex subagents and project roles; inherit host model settings. Keep small work direct. Child specialists execute their assigned scope and report to the manager; they do not start another manager run. Keep useful local work going alongside independent specialists.
+For substantive work, keep this manager conversation on host `gpt-5.6-terra` at medium reasoning effort. The project-scoped custom agents enforce specialist routes; do not change or overwrite the user's host model configuration. Delegate architecture/planning first, decomposition when needed, then bounded implementation assignments with explicit file ownership and dependencies. Keep small work direct. Child specialists execute their assigned scope and report to the manager; they do not start another manager run. Keep useful local work going alongside independent specialists.
+
+## Model routing and escalation
+
+Use the installed custom agents by name; their TOML configurations set the model and reasoning effort:
+
+| Role | Agent and route | Use for |
+| --- | --- | --- |
+| Manager | Host `gpt-5.6-terra`, medium | Goal clarification, workflow decisions, final integration, and verification repair coordination. |
+| Lead / planner | `devgod-terra-lead` — Terra, medium | Architecture reconnaissance, decomposition, integration, cross-component debugging, API/schema decisions, and Luna escalations. |
+| Worker | `devgod-luna-worker` — Luna, medium | Clear bounded implementation, focused tests, mechanical refactors, documentation, and targeted known-path repairs. |
+| Expert escalation | `devgod-sol-expert` — Sol, high | Persistent ambiguous blockers, high-risk security/data-integrity decisions, material design disagreement, and difficult cross-system root causes. |
+
+Assign Luna only a concrete packet with acceptance criteria, owned paths, dependencies, and checks. Escalate Luna to Terra before editing when requirements are unclear; the change crosses public API, schema, persistence, security, concurrency, or unassigned component boundaries; or a repair fails without an evidence-backed cause. Terra resolves ordinary ambiguity and integrates coherent work. Escalate Terra to Sol only with a concise evidence packet after focused investigation: attempted approaches, observed failures, affected paths, acceptance criteria, and the unresolved decision. Do not use Luna at maximum effort as a substitute for escalation. Do not send routine implementation, broad exploration, or ordinary reviews to Sol.
+
+The manager remains accountable for task assignment, integration, checks, and the DevGod verification gate. A Sol expert diagnoses or recommends a resolution; a separate current verification pass still reviews the resulting candidate.
 
 Discover the connected DevGod MCP tools and read their schemas. Call status to restore any active run before creating another. Record the accepted goal, acceptance IDs, decisions, task dependencies, owned paths, and actual check commands through the structured run/task tools. DevGod creates workflow records and a safe local branch automatically. Never ask the user to write action JSON, task packets, checkpoints, review receipts, or queue transitions. Do not modify DevGod's private database or evidence files. Host Goal mode is optional and may be created only when explicitly requested by the user.
 

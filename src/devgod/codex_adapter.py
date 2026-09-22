@@ -784,19 +784,17 @@ class CodexAdapter:
                         "when evidence is insufficient; never claim checks you did not observe."
                     ),
                 }
-                if policy.review_model is not None:
-                    params["model"] = policy.review_model
-                elif source_defaults.get("model") is not None:
-                    params["model"] = source_defaults["model"]
+                route = policy.review_route(role)
+                params["model"] = route.model
                 for key, wire_key in (
                     ("model_provider", "modelProvider"),
                     ("service_tier", "serviceTier"),
                 ):
                     if source_defaults.get(key) is not None:
                         params[wire_key] = source_defaults[key]
-                for key in ("model_reasoning_effort", "model_verbosity"):
-                    if source_defaults.get(key) is not None:
-                        params["config"][key] = source_defaults[key]
+                params["config"]["model_reasoning_effort"] = route.reasoning_effort
+                if source_defaults.get("model_verbosity") is not None:
+                    params["config"]["model_verbosity"] = source_defaults["model_verbosity"]
                 thread = await asyncio.to_thread(job.client.thread_start, params)
                 job.thread_id = thread.thread.id
                 sandbox = _plain(thread.sandbox)

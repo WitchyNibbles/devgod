@@ -100,6 +100,7 @@ class Policy(Model):
     approval_policy: Literal["never"] = "never"
     network_access: Literal[False] = False
     review_model: ShortText | None = None
+    review_routes: dict[Role, ModelRoute] = Field(default_factory=dict)
     max_parallel_reviews: int = Field(default=3, strict=True, ge=1, le=3)
     max_attempts: int = Field(default=3, strict=True, ge=1, le=5)
     command_timeout_seconds: int = Field(default=600, strict=True, ge=1, le=3600)
@@ -111,6 +112,28 @@ class Policy(Model):
     def nonblank_model(cls, value: str | None) -> str | None:
         if value is not None and not value.strip():
             raise ValueError("review model must not be blank")
+        return value
+
+    def review_route(self, role: Role) -> ModelRoute:
+        """Resolve a reviewer's explicit route without inheriting host settings."""
+        if route := self.review_routes.get(role):
+            return route
+        if self.review_model is not None:
+            return ModelRoute(model=self.review_model, reasoning_effort="high")
+        return ModelRoute(model="gpt-5.6-terra", reasoning_effort="high")
+
+
+class ModelRoute(Model):
+    """Pinned model and reasoning level for a role-owned Codex invocation."""
+
+    model: ShortText
+    reasoning_effort: Literal["low", "medium", "high", "xhigh", "max"] = "high"
+
+    @field_validator("model")
+    @classmethod
+    def nonblank_model(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("route model must not be blank")
         return value
 
 

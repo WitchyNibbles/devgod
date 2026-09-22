@@ -6,6 +6,18 @@ Use your existing Codex conversation. The manager performs planning, delegation,
 
 DevGod follows repository instructions, applicable skills, custom agent roles, and quality gates. Native implementation specialists receive bounded scopes. Independent code, QA, and security verification uses separate SDK sessions with recorded provider thread and turn identities.
 
+## Model routes
+
+Use **GPT-5.6 Terra at medium reasoning effort** for the host conversation that invokes `devgod-manager`. Codex custom-agent configuration cannot override that active root conversation, so choose it in Codex before starting substantive DevGod work. Setup deliberately does not write a root `model` or `model_reasoning_effort` into the user's configuration.
+
+| Route | Enforced project agent | When the manager dispatches it |
+| --- | --- | --- |
+| Worker | `devgod-luna-worker` — Luna / medium | Clear, bounded coding tasks with explicit acceptance criteria, path ownership, and checks; focused test work; mechanical refactors; known-path repairs. |
+| Lead | `devgod-terra-lead` — Terra / medium | Planning, decomposition, integration, ordinary multi-file debugging, API/schema decisions, and Luna escalations. |
+| Expert | `devgod-sol-expert` — Sol / high | Evidence-backed hard blockers, material design disagreement, difficult root cause analysis, and high-risk security or data-integrity decisions. |
+
+Escalate a Luna worker to Terra for unclear behavior, a public API/schema/persistence/security/concurrency boundary, a scope that crosses assigned components, or an unexplained failed repair. Escalate Terra to Sol only after a focused investigation package names the attempted approaches, observed evidence, affected paths, acceptance criteria, and remaining question. Do not use Luna at maximum effort as a routine alternative to Terra, and do not use Sol for normal implementation or self-approval.
+
 The gate requires complete implementation claims, task coverage of accepted criteria, passing checks, all three independent reviews, and current source and artifact integrity. Reviews must account for the accepted criteria and cite supplied evidence. A completion message, checkpoint field, or passing test alone cannot grant verification.
 
 ## Installation ownership
@@ -16,6 +28,7 @@ Install the Python distribution in a stable environment outside the consuming re
 | --- | --- |
 | `AGENTS.md` managed section | Route substantive work to the manager. |
 | `.agents/skills/devgod-manager/` | Manager instructions and metadata; numbered on collision. |
+| `.codex/agents/devgod-*.toml` | Managed project-scoped Luna worker, Terra lead, and Sol expert routes; an existing or edited role file remains active rather than being overwritten. |
 | `.codex/config.toml` managed section | Local stdio MCP service and scoped automatic tool approval. |
 | `.codex/hooks.json` selected entries | Restore context, observe lifecycle, and request bounded continuation. |
 | `.devgod/native-install.json` | Ownership, content hashes, and runtime paths. |

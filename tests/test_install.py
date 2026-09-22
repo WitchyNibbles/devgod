@@ -41,6 +41,38 @@ def test_install_is_idempotent_and_removable(repo):
     assert not install.uninstall(repo)["removed"]
 
 
+def test_role_agents_are_managed_and_preserve_user_edits(repo):
+    install.init(repo)
+    agents = [repo / ".codex/agents" / name for name in install.ROLE_AGENT_FILES]
+    assert all(path.exists() for path in agents)
+    manifest = json.loads((repo / install.MANIFEST).read_text())
+    assert {str(path.relative_to(repo)) for path in agents} <= set(manifest["files"])
+
+    edited = agents[0]
+    edited.write_text(edited.read_text() + "\n# local customization\n")
+    result = install.init(repo)
+    assert str(edited.relative_to(repo)) in result["preserved_edits"]
+
+    result = install.uninstall(repo)
+    assert str(edited.relative_to(repo)) in result["preserved"]
+    assert edited.exists()
+    assert all(not path.exists() for path in agents[1:])
+
+
+def test_role_agents_are_added_to_existing_version_two_manifest(repo):
+    install.init(repo)
+    manifest_path = repo / install.MANIFEST
+    manifest = json.loads(manifest_path.read_text())
+    for name in install.ROLE_AGENT_FILES:
+        del manifest["files"][f".codex/agents/{name}"]
+    manifest_path.write_text(json.dumps(manifest))
+
+    install.init(repo)
+    upgraded = json.loads(manifest_path.read_text())
+    assert upgraded["version"] == 2
+    assert all(f".codex/agents/{name}" in upgraded["files"] for name in install.ROLE_AGENT_FILES)
+
+
 def test_existing_settings_comments_and_instructions_survive(repo):
     agents = "# Local standards\n\nAlways run the project's own gate.\n"
     config = '# User notes\nmodel = "custom-model"\napproval_policy = "on-request"\n\n[features]\nhooks = false\n\n[mcp_servers.other]\ncommand = "other" # keep this\n'

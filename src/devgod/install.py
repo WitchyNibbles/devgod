@@ -22,6 +22,11 @@ from typing import Any
 
 ASSETS = Path(__file__).parent / "assets"
 MANIFEST = ".devgod/native-install.json"
+ROLE_AGENT_FILES = (
+    "devgod-luna-worker.toml",
+    "devgod-terra-lead.toml",
+    "devgod-sol-expert.toml",
+)
 AGENTS_BEGIN = "<!-- BEGIN DEVGOD NATIVE -->"
 AGENTS_END = "<!-- END DEVGOD NATIVE -->"
 CONFIG_BEGIN = "# BEGIN DEVGOD NATIVE"
@@ -472,6 +477,22 @@ def init(repo: Path | str, executable: str | Sequence[str] | None = None, *, mig
         else:
             pending[target] = desired
             files[target] = _digest(desired)
+    agent_source = ASSETS / "devgod" / "agents"
+    for name in ROLE_AGENT_FILES:
+        target = f".codex/agents/{name}"
+        desired = (agent_source / name).read_text(encoding="utf-8")
+        current = _read(root, target)
+        old_hash = previous.get("files", {}).get(target)
+        if current and current != desired:
+            # Keep local customizations (and pre-existing custom agents using a
+            # DevGod role name) active. The packaged revision is retained as a
+            # private .new backup, just like an edited managed skill.
+            backups.append(_backup(root, target + ".new", desired, selected_state))
+            retained.append(target)
+            files[target] = old_hash or _digest(desired)
+        else:
+            pending[target] = desired
+            files[target] = _digest(desired)
     body = (ASSETS / "agents-block.md").read_text().format(skill_path=f"{skill_dir}/SKILL.md")
     old_agents = previous.get("sections", {}).get("AGENTS.md", "")
     span = _block(agents, AGENTS_BEGIN, AGENTS_END)
@@ -529,7 +550,11 @@ def uninstall(repo: Path | str) -> dict[str, Any]:
     skill_dir = manifest.get("skill_dir", "")
     if not re.fullmatch(r"\.agents/skills/devgod-manager(?:-\d+)?", str(skill_dir)):
         raise InstallError("Invalid managed skill location")
-    allowed = {f"{skill_dir}/SKILL.md", f"{skill_dir}/agents/openai.yaml"}
+    allowed = {
+        f"{skill_dir}/SKILL.md",
+        f"{skill_dir}/agents/openai.yaml",
+        *(f".codex/agents/{name}" for name in ROLE_AGENT_FILES),
+    }
     if set(manifest.get("files", {})) - allowed or set(manifest.get("sections", {})) - {"AGENTS.md", ".codex/config.toml"}:
         raise InstallError("Manifest contains unowned installation paths")
     for path in [*allowed, "AGENTS.md", ".codex/config.toml", ".codex/hooks.json", MANIFEST]:

@@ -64,6 +64,12 @@ Open or reconnect that project in Codex to load the integration. Codex controls 
 
 Setup preserves existing instructions and configuration. It adds a small managed `AGENTS.md` section, a manager skill, a project MCP entry, lifecycle hooks, and an ownership manifest. Automatic tool approval is scoped to the DevGod MCP entry. Global Codex permissions remain under your control.
 
+### Role-based model routing
+
+DevGod installs project-scoped Codex agents that route clear implementation work to **GPT-5.6 Luna / medium**, ordinary planning and integration to **GPT-5.6 Terra / medium**, and evidence-backed hard escalations to **GPT-5.6 Sol / high**. The manager is intentionally a host conversation: select **GPT-5.6 Terra / medium** for that conversation before starting substantive DevGod work. Installation never rewrites your root model setting.
+
+Luna workers receive explicit acceptance criteria, owned paths, dependencies, and checks. They escalate to Terra for unclear requirements; API, schema, persistence, security, concurrency, or cross-component work; and unexplained failed repairs. Terra escalates to Sol only after focused investigation leaves a material hard blocker, high-risk decision, or unresolved disagreement. The final DevGod check and independent reviews remain separate from all implementation roles.
+
 `doctor` checks installation, dependency metadata, and local capabilities; it does not claim a successful authenticated model invocation. The package pins the Python Codex SDK and compatible runtime to **0.154.0**.
 
 ## 🗝️ Your everyday spellbook
@@ -74,7 +80,7 @@ Keep talking to Codex as usual:
 
 The installed instructions route substantive work through `devgod-manager`; you can also explicitly invoke `$devgod-manager`. Small questions and administrative changes stay lightweight.
 
-The manager records acceptance criteria, task scopes and dependencies, and actual verification commands. Native Codex specialists implement the work. The service executes checks and launches independent code, QA, and security sessions against a frozen source snapshot. The manager repairs failures and requests fresh verification until the current candidate passes.
+The manager records acceptance criteria, task scopes and dependencies, and actual verification commands. Native Codex specialists implement the work through the installed role routes. The service executes checks and launches independent code, QA, and security sessions against a frozen source snapshot. The manager repairs failures and requests fresh verification until the current candidate passes.
 
 You do not write action JSON, review receipts, checkpoints, or queue transitions. Progress and findings stay in the Codex conversation. Separate SDK review sessions appear in DevGod status; they are distinct from native implementation subagents.
 

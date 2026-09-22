@@ -28,7 +28,7 @@ from devgod.codex_adapter import (
     deny_approval,
 )
 from devgod.launcher import pidfd_open, pidfd_send_signal
-from devgod.models import Candidate, CheckSpec, Policy
+from devgod.models import Candidate, CheckSpec, ModelRoute, Policy
 
 
 @pytest.fixture(autouse=True)
@@ -74,6 +74,7 @@ class FakeClient:
         self.review_events: list[Any] | None = None
         self.buffered_stdout = ""
         self.source_model: str | None = None
+        self.source_reasoning_effort: str | None = None
 
     def start(self) -> None:
         if self.block_startup:
@@ -123,7 +124,7 @@ class FakeClient:
             }
             if params["cwd"] != self.config.cwd and self.source_model is not None:
                 config["model"] = self.source_model
-                config["model_reasoning_effort"] = "high"
+                config["model_reasoning_effort"] = self.source_reasoning_effort or "high"
             return SimpleNamespace(config=config)
         if method == "mcpServerStatus/list":
             return SimpleNamespace(
@@ -361,7 +362,8 @@ def test_review_has_strict_schema_isolated_tools_and_observed_ids(candidate: Can
     client = factory.clients[0]
     start = next(payload for method, payload in client.requests if method == "thread/start")
     assert start["sandbox"] == "read-only" and start["approvalPolicy"] == "never"
-    assert "model" not in start
+    assert start["model"] == "gpt-5.6-terra"
+    assert start["config"]["model_reasoning_effort"] == "high"
     assert start["config"]["mcp_servers"]["devgod"]["enabled"] is False
     assert start["config"]["plugins"]["other@local"]["enabled"] is False
     assert start["config"]["apps"]["configured"]["enabled"] is False
@@ -452,26 +454,72 @@ def test_review_timeout_interrupts_provider_turn(candidate: Candidate) -> None:
     assert factory.clients[0].closed
 
 
-@pytest.mark.parametrize("override, expected", [(None, "repo-default"), ("chosen", "chosen")])
-def test_review_resolves_repo_model_without_activating_source_config(
-    candidate: Candidate, override: str | None, expected: str
+@pytest.mark.parametrize("role", ["reviewer", "qa_engineer", "security_reviewer"])
+def test_review_defaults_to_terra_high_without_leaking_source_route(
+    candidate: Candidate, role: str
 ) -> None:
-    factory = Factory(source_model="repo-default")
+    factory = Factory(source_model="gpt-5.5", source_reasoning_effort="low")
     result = asyncio.run(
         CodexAdapter(client_factory=factory).run_review(
-            "reviewer",
+            role,  # type: ignore[arg-type]
             candidate,
             {},
-            Policy(review_model=override),
+            Policy(),
         )
     )
     assert result.succeeded
     client = factory.clients[0]
     start = next(payload for method, payload in client.requests if method == "thread/start")
-    assert start["model"] == expected
+    assert start["model"] == "gpt-5.6-terra"
     assert start["config"]["model_reasoning_effort"] == "high"
     assert client.config.cwd == candidate.snapshot_path
     assert start["cwd"] == candidate.snapshot_path
+
+
+@pytest.mark.parametrize("role", ["reviewer", "qa_engineer", "security_reviewer"])
+def test_legacy_review_model_remains_the_all_role_high_fallback(
+    candidate: Candidate, role: str
+) -> None:
+    factory = Factory(source_model="gpt-5.5", source_reasoning_effort="low")
+    result = asyncio.run(
+        CodexAdapter(client_factory=factory).run_review(
+            role,  # type: ignore[arg-type]
+            candidate,
+            {},
+            Policy(review_model="legacy-reviewer"),
+        )
+    )
+    assert result.succeeded
+    start = next(
+        payload for method, payload in factory.clients[0].requests if method == "thread/start"
+    )
+    assert start["model"] == "legacy-reviewer"
+    assert start["config"]["model_reasoning_effort"] == "high"
+
+
+def test_explicit_review_route_overrides_legacy_model(candidate: Candidate) -> None:
+    factory = Factory(source_model="gpt-5.5", source_reasoning_effort="low")
+    result = asyncio.run(
+        CodexAdapter(client_factory=factory).run_review(
+            "security_reviewer",
+            candidate,
+            {},
+            Policy(
+                review_model="legacy-reviewer",
+                review_routes={
+                    "security_reviewer": ModelRoute(
+                        model="gpt-5.6-sol", reasoning_effort="max"
+                    )
+                },
+            ),
+        )
+    )
+    assert result.succeeded
+    start = next(
+        payload for method, payload in factory.clients[0].requests if method == "thread/start"
+    )
+    assert start["model"] == "gpt-5.6-sol"
+    assert start["config"]["model_reasoning_effort"] == "max"
 
 
 def test_cancellation_during_startup_cannot_leak_late_transport(candidate: Candidate) -> None:
