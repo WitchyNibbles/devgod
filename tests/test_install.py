@@ -73,6 +73,34 @@ def test_role_agents_are_added_to_existing_version_two_manifest(repo):
     assert all(f".codex/agents/{name}" in upgraded["files"] for name in install.ROLE_AGENT_FILES)
 
 
+@pytest.mark.parametrize("feature", [None, True])
+def test_doctor_accepts_enabled_or_unspecified_multi_agent(repo, feature):
+    if feature is not None:
+        (repo / ".codex").mkdir()
+        (repo / ".codex/config.toml").write_text(f"[features]\nmulti_agent = {str(feature).lower()}\n")
+    install.init(repo)
+
+    result = install.doctor(repo)
+
+    assert result["ok"]
+    assert not any("multi_agent" in problem for problem in result["problems"])
+
+
+def test_doctor_explains_how_to_enable_explicitly_disabled_multi_agent(repo):
+    (repo / ".codex").mkdir()
+    (repo / ".codex/config.toml").write_text("[features]\nmulti_agent = false\n")
+    install.init(repo)
+
+    result = install.doctor(repo)
+
+    assert not result["ok"]
+    assert result["problems"] == [
+        "Native subagents are disabled by project configuration "
+        "([features].multi_agent = false); set it to true or remove the setting, "
+        "then reopen the Codex session"
+    ]
+
+
 def test_existing_settings_comments_and_instructions_survive(repo):
     agents = "# Local standards\n\nAlways run the project's own gate.\n"
     config = '# User notes\nmodel = "custom-model"\napproval_policy = "on-request"\n\n[features]\nhooks = false\n\n[mcp_servers.other]\ncommand = "other" # keep this\n'

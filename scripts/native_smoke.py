@@ -18,6 +18,7 @@ import importlib.metadata
 import json
 import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -31,6 +32,106 @@ from urllib.parse import unquote, urlparse
 
 def plain(value: Any) -> Any:
     return value.model_dump(mode="json", by_alias=True) if hasattr(value, "model_dump") else value
+
+
+FINAL_HANDOFF_SECTIONS = ("Outcome", "Changes", "Verification", "Agents", "Limitations")
+FINAL_HANDOFF_FAILURE_LIMIT = 500
+FINAL_HANDOFF_REPORT_LIMIT = 16_384
+
+
+def final_handoff_report(message: str) -> dict[str, Any]:
+    """Return bounded report evidence while preserving full-message identity."""
+    return {
+        "final_message": message[:FINAL_HANDOFF_REPORT_LIMIT],
+        "final_message_truncated": len(message) > FINAL_HANDOFF_REPORT_LIMIT,
+        "final_message_sha256": hashlib.sha256(message.encode()).hexdigest(),
+    }
+
+
+def validate_turn_completion(payload: Any, expected_turn_id: str) -> str | None:
+    """Return a bounded failure reason for an invalid root-turn completion."""
+    if not isinstance(payload, dict):
+        return "Native manager completion payload was not an object."
+    completed = payload.get("turn")
+    if not isinstance(completed, dict) or completed.get("id") != expected_turn_id:
+        return "Native manager completion identity did not match the requested turn."
+    if completed.get("status") != "completed" or completed.get("error"):
+        return "Native manager turn failed or was interrupted."
+    return None
+
+
+def validate_final_handoff(message: str) -> tuple[bool, str | None]:
+    """Validate the manager's user-facing terminal handoff without runtime state."""
+    if not isinstance(message, str) or not message.strip():
+        return False, "No completed root agentMessage was captured."
+
+    heading_pattern = re.compile(
+        r"(?im)^#{1,6}\s+(Outcome|Changes|Verification|Agents|Limitations)\s*:?\s*$"
+    )
+    matches = list(heading_pattern.finditer(message))
+    found = [match.group(1) for match in matches]
+    failures: list[str] = []
+    if found != list(FINAL_HANDOFF_SECTIONS):
+        failures.append(
+            "Expected terminal sections in order: " + ", ".join(FINAL_HANDOFF_SECTIONS) + "."
+        )
+
+    bodies: dict[str, str] = {}
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(message)
+        bodies[match.group(1)] = message[match.end():end].strip()
+    for section in FINAL_HANDOFF_SECTIONS:
+        if not bodies.get(section):
+            failures.append(f"Section {section} must contain concrete content.")
+
+    changes = bodies.get("Changes", "")
+    missing_fixture_files = [
+        filename for filename in ("greetings.py", "welcome.py") if filename not in changes
+    ]
+    if missing_fixture_files:
+        failures.append("Changes must name changed fixture files: " + ", ".join(missing_fixture_files) + ".")
+
+    verification = bodies.get("Verification", "")
+    accepted_check = "/usr/bin/python3 -m unittest discover -v"
+    if accepted_check not in verification:
+        failures.append("Verification must name the accepted unittest command.")
+    positive_result = re.search(
+        r"(?i)\b(?:OK|passed|exit(?:ed)?(?:\s+code)?\s*[:=]?\s*0|success(?:ful)?)\b",
+        verification,
+    )
+    negative_result = re.search(
+        r"(?i)\b(?:not\s+(?:passed|successful|ok|succeeded)|"
+        r"did(?:\s+not|n't)\s+(?:pass|succeed)|unsuccessful|failed|failure|nonzero|"
+        r"exit(?:ed)?(?:\s+code)?\s*[:=]?\s*[1-9]\d*)\b",
+        verification,
+    )
+    if not positive_result or negative_result:
+        failures.append("Verification must state the accepted check result.")
+    if not re.search(r"(?i)\bbranch\b", verification) or not re.search(
+        r"(?i)\bverified\b", verification
+    ):
+        failures.append("Verification must state the branch and verified kernel status.")
+
+    agents = bodies.get("Agents", "")
+    planning_entry = re.search(
+        r"(?im)^\s*[-*]?\s*(?:native\s+)?(?:architect|planner|planning\s+lead|terra\s+lead)\s*:\s*"
+        r".*\b(?:completed|concluded|planned|recommended|approved|done)\b.*$",
+        agents,
+    )
+    implementation_entry = re.search(
+        r"(?im)^\s*[-*]?\s*(?:native\s+)?(?:implementer|implementation\s+specialist|worker|"
+        r"developer|luna\s+worker)\s*:\s*"
+        r".*\b(?:completed|concluded|implemented|changed|passed|done)\b.*$",
+        agents,
+    )
+    if not re.search(r"(?i)\bnative\b", agents) or not planning_entry or not implementation_entry:
+        failures.append(
+            "Agents must give separate native Planner and Implementer entries with conclusions."
+        )
+
+    if failures:
+        return False, " ".join(failures)[:FINAL_HANDOFF_FAILURE_LIMIT]
+    return True, None
 
 
 def _toml_value(value: Any) -> str:
@@ -238,6 +339,12 @@ async def _exercise(output: Path, timeout: int, isolated: PrivateCodexHome) -> d
         "Use /usr/bin/python3 -m unittest discover -v as the accepted deterministic check. "
         "Use the MCP wait/status tools while verification runs, repair any findings, and "
         "finish only after the kernel reports the current local branch verified. "
+        "Work autonomously through completion in this single turn; do not stop for "
+        "step-by-step next-step updates. End with Markdown sections in this exact order: "
+        "Outcome, Changes, Verification, Agents, Limitations. Name greetings.py and "
+        "welcome.py under Changes; under Verification give the accepted command, its "
+        "result, and the verified branch/status; under Agents give each native agent "
+        "role and conclusion as separate `Planner:` and `Implementer:` entries. "
         "Do not edit DevGod state/evidence or fabricate receipts. Do not grant hook trust. "
         "If the native host cannot provide a needed capability, describe the concrete limit."
     )
@@ -275,6 +382,7 @@ async def _exercise(output: Path, timeout: int, isolated: PrivateCodexHome) -> d
         "hook_lifecycle_and_first_use_ui_trust_tested": False,
     }
     observed_items: dict[str, dict[str, Any]] = {}
+    completed_root_messages: list[str] = []
     process_evidence: dict[tuple[int, str], dict[str, Any]] = {}
     monitor: asyncio.Task[None] | None = None
 
@@ -355,10 +463,19 @@ async def _exercise(output: Path, timeout: int, isolated: PrivateCodexHome) -> d
                 item = payload.get("item") if isinstance(payload, dict) else None
                 if isinstance(item, dict) and item.get("id"):
                     observed_items[item["id"]] = item
-                    if event.method == "item/completed":
-                        print(json.dumps({"method": event.method, "type": item.get("type"),
+                if event.method == "item/completed":
+                    if isinstance(item, dict) and item.get("type") == "agentMessage":
+                        text = item.get("text")
+                        if isinstance(text, str):
+                            # Notifications belong to the root turn; child work is
+                            # represented separately by subAgentActivity items.
+                            completed_root_messages.append(text)
+                    print(json.dumps({"method": event.method, "type": item.get("type"),
                                           "tool": item.get("tool"), "name": item.get("name")}), flush=True)
                 if event.method == "turn/completed":
+                    completion_failure = validate_turn_completion(payload, turn.turn.id)
+                    if completion_failure:
+                        raise RuntimeError(completion_failure)
                     report["turn_result"] = payload
                     break
         status = json.loads(run([*cli, "status"]))
@@ -374,6 +491,11 @@ async def _exercise(output: Path, timeout: int, isolated: PrivateCodexHome) -> d
             if item.get("agentThreadId") and item.get("kind") == "started"
         })
         report["native_child_thread_ids"] = native_child_ids
+        final_message = completed_root_messages[-1] if completed_root_messages else ""
+        final_handoff_valid, final_handoff_failure = validate_final_handoff(final_message)
+        report.update(final_handoff_report(final_message))
+        report["final_handoff_valid"] = final_handoff_valid
+        report["final_handoff_validation_failure"] = final_handoff_failure
         report["mcp_call_count"] = len(mcp_calls)
         report["mcp_calls"] = [{key: item.get(key) for key in ("id", "type", "server", "tool", "status")} for item in mcp_calls]
         approval_errors = [
@@ -392,12 +514,13 @@ async def _exercise(output: Path, timeout: int, isolated: PrivateCodexHome) -> d
             and dependencies
             and len(native_child_ids) >= 3
             and mcp_calls
+            and final_handoff_valid
             and not approvals
             and not approval_errors
         ):
             report["status"] = "passed"
         else:
-            report["limitation"] = "The observed run did not satisfy every native-delegation, dependency, MCP, and verified-state condition."
+            report["limitation"] = "The single native manager turn did not satisfy every delegation, dependency, MCP, verified-state, and final-handoff condition."
     except Exception as exc:
         report.update(status="failed", error=f"{type(exc).__name__}: {exc}")
     finally:

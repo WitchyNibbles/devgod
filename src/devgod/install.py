@@ -632,6 +632,12 @@ def doctor(repo: Path | str) -> dict[str, Any]:
             if _digest(_read(root, path)) != digest:
                 problems.append(f"Managed skill file is missing or edited: {path}")
     notes = [TRUST_NOTE]
+    if config.get("features", {}).get("multi_agent") is False:
+        problems.append(
+            "Native subagents are disabled by project configuration "
+            "([features].multi_agent = false); set it to true or remove the setting, "
+            "then reopen the Codex session"
+        )
     if config.get("features", {}).get("hooks") is False:
         notes.append("Project configuration disables hooks; existing project controls were preserved")
     if config.get("hooks"):

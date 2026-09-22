@@ -175,3 +175,117 @@ def test_exercise_failure_records_shared_hashes_and_cleans_credentials(
     assert report["configuration_isolation"]["private_home_removed"]
     assert not Path(report["configuration_isolation"]["private_home"]).exists()
     assert "never-print-me" not in json.dumps(report)
+
+
+VALID_FINAL_HANDOFF = """## Outcome
+Implemented and verified the requested greeting behavior.
+
+## Changes
+Changed greetings.py and welcome.py, with coverage in test_greetings.py.
+
+## Verification
+Accepted check `/usr/bin/python3 -m unittest discover -v` passed with OK. Kernel status: branch `main` verified.
+
+## Agents
+Native delegated roles:
+- Planner: concluded the design.
+- Implementer: completed both modules.
+- Verification agent: concluded all checks passed.
+
+## Limitations
+None.
+"""
+
+
+def test_final_handoff_validator_accepts_concrete_terminal_report():
+    assert smoke.validate_final_handoff(VALID_FINAL_HANDOFF) == (True, None)
+
+
+@pytest.mark.parametrize(
+    ("message", "reason"),
+    [
+        (VALID_FINAL_HANDOFF.replace("## Limitations", "## Notes"), "terminal sections"),
+        (VALID_FINAL_HANDOFF.replace(" and welcome.py", ""), "welcome.py"),
+        (
+            VALID_FINAL_HANDOFF.replace("/usr/bin/python3 -m unittest discover -v", "unittest"),
+            "accepted unittest command",
+        ),
+        (VALID_FINAL_HANDOFF.replace("passed with OK", "was run"), "check result"),
+        (VALID_FINAL_HANDOFF.replace("passed with OK", "not passed"), "check result"),
+        (VALID_FINAL_HANDOFF.replace("passed with OK", "was not successful"), "check result"),
+        (VALID_FINAL_HANDOFF.replace("passed with OK", "was not OK"), "check result"),
+        (VALID_FINAL_HANDOFF.replace("branch `main` verified", "current revision"), "branch"),
+        (
+            VALID_FINAL_HANDOFF.replace(
+                "Native delegated roles:\n- Planner: concluded the design.\n"
+                "- Implementer: completed both modules.\n"
+                "- Verification agent: concluded all checks passed.",
+                "Several workers participated.",
+            ),
+            "separate native Planner and Implementer entries",
+        ),
+        (
+            VALID_FINAL_HANDOFF.replace("- Planner: concluded the design.\n", ""),
+            "separate native Planner and Implementer entries",
+        ),
+        (
+            VALID_FINAL_HANDOFF.replace("- Implementer: completed both modules.\n", ""),
+            "separate native Planner and Implementer entries",
+        ),
+        (
+            VALID_FINAL_HANDOFF.replace(
+                "- Planner: concluded the design.", "- Planner: participated."
+            ),
+            "separate native Planner and Implementer entries",
+        ),
+        (
+            VALID_FINAL_HANDOFF.replace(
+                "- Implementer: completed both modules.", "- Implementer: participated."
+            ),
+            "separate native Planner and Implementer entries",
+        ),
+    ],
+)
+def test_final_handoff_validator_rejects_missing_evidence(message, reason):
+    valid, failure = smoke.validate_final_handoff(message)
+    assert not valid
+    assert failure is not None and reason in failure
+    assert len(failure) <= smoke.FINAL_HANDOFF_FAILURE_LIMIT
+
+
+def test_final_handoff_validator_bounds_failure_reason():
+    message = "\n".join(f"## Unknown{i}\n" for i in range(1000))
+    valid, failure = smoke.validate_final_handoff(message)
+    assert not valid
+    assert failure is not None
+    assert len(failure) <= smoke.FINAL_HANDOFF_FAILURE_LIMIT
+
+
+def test_final_handoff_report_bounds_message_and_preserves_identity():
+    message = "x" * (smoke.FINAL_HANDOFF_REPORT_LIMIT + 10)
+
+    report = smoke.final_handoff_report(message)
+
+    assert report["final_message"] == message[: smoke.FINAL_HANDOFF_REPORT_LIMIT]
+    assert report["final_message_truncated"] is True
+    assert len(report["final_message_sha256"]) == 64
+    assert report["final_message_sha256"] != smoke.final_handoff_report(message + "y")[
+        "final_message_sha256"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("payload", "expected_id", "failure"),
+    [
+        ({"turn": {"id": "turn-1", "status": "completed", "error": None}}, "turn-1", None),
+        ({"turn": {"id": "turn-2", "status": "completed", "error": None}}, "turn-1", "identity"),
+        ({"turn": {"id": "turn-1", "status": "failed", "error": None}}, "turn-1", "failed"),
+        ({"turn": {"id": "turn-1", "status": "completed", "error": {"message": "bad"}}}, "turn-1", "failed"),
+    ],
+)
+def test_turn_completion_validator_requires_successful_requested_turn(payload, expected_id, failure):
+    result = smoke.validate_turn_completion(payload, expected_id)
+    if failure is None:
+        assert result is None
+    else:
+        assert result is not None and failure in result

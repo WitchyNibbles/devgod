@@ -41,6 +41,10 @@ Codex owns project trust and exact-definition hook trust. Installation does not 
 
 The distribution also includes a Codex plugin manifest and supporting assets. Repository `init` is the documented setup path; it does not install a global marketplace entry.
 
+Repository enrollment depends on the files written by `init`, including the project-scoped `.codex/agents/devgod-*.toml` routes. Merely installing the distribution or plugin, or making the manager skill available, does not enroll a repository. Current local Codex can launch subagents when applicable skill or project instructions request them. Reopen the Codex session after `init` or after changing project agent or feature configuration so Codex reloads it. An explicit `[features].multi_agent = false` disables those native routes; `doctor` reports that setting as an actionable problem without rewriting it.
+
+`doctor` inspects files and local configuration. It cannot observe the model selected in the UI, project trust, hook approval, or whether a subagent has spawned successfully. The isolated SDK sessions used for DevGod's code, QA, and security reviews intentionally disable further delegation; that restriction does not describe the host manager session.
+
 ## State and workspace safety
 
 The default private root is `$XDG_STATE_HOME/devgod/repos/`, falling back to `~/.local/state/devgod/repos/`. Each canonical Git repository has separate SQLite state and evidence. Linked worktrees share repository storage while runs remain bound to their originating worktree. `--state-home PATH` selects an alternate external root; repository-local state is rejected.
