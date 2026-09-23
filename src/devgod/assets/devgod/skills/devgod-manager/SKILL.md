@@ -21,14 +21,14 @@ Use the installed custom agents by name. Their TOML configurations set the model
 
 | Role | Agent route | Use for |
 | --- | --- | --- |
-| Manager | Host `gpt-5.6-terra`, medium | Intake, workflow decisions, integration, and verification repair coordination. |
-| Lead / planner | `devgod-terra-lead` | Architecture reconnaissance, decomposition, cross-component debugging, API or schema decisions, and Luna escalation. |
+| Manager | Host `gpt-5.6-sol`, medium | Intake, workflow decisions, integration, and verification repair coordination. |
+| Lead / planner | `devgod-sol-lead` | Architecture reconnaissance, decomposition, cross-component debugging, API or schema decisions, and Luna escalation. |
 | Worker | `devgod-luna-worker` | Bounded implementation, focused tests, mechanical refactors, documentation, and known-path repairs. |
 | Expert escalation | `devgod-sol-expert` | Persistent ambiguous blockers, high-risk security or data-integrity decisions, material design disagreement, and difficult cross-system root causes. |
 
 After the planner reports, dispatch at least one implementation child for a concrete bounded assignment when implementation remains. Give every worker acceptance criteria, owned paths, dependencies, and required checks. Keep file ownership disjoint when agents run concurrently. The manager owns integration and must inspect every result; a child report is evidence, not completion.
 
-Assign Luna only a clear implementation packet. Escalate from Luna to Terra when requirements remain unclear, work crosses an unassigned component boundary, or changes affect public APIs, schemas, persistence, security, or concurrency. Escalate from Terra to Sol only with a concise evidence packet containing attempted approaches, observed failures, affected paths, acceptance criteria, and the unresolved decision.
+Assign Luna only a clear implementation packet. Escalate from Luna to the Sol lead when requirements remain unclear, work crosses an unassigned component boundary, or changes affect public APIs, schemas, persistence, security, or concurrency. Escalate from the Sol lead to the Sol expert only with a concise evidence packet containing attempted approaches, observed failures, affected paths, acceptance criteria, and the unresolved decision.
 
 ## Record and execute
 

@@ -25,12 +25,13 @@ REQUIRED_ASSETS = (
     "devgod/assets/devgod/.mcp.json",
     "devgod/assets/devgod/hooks/hooks.json",
     "devgod/assets/devgod/agents/devgod-luna-worker.toml",
-    "devgod/assets/devgod/agents/devgod-terra-lead.toml",
+    "devgod/assets/devgod/agents/devgod-sol-lead.toml",
     "devgod/assets/devgod/agents/devgod-sol-expert.toml",
     "devgod/assets/devgod/skills/devgod-manager/SKILL.md",
     "devgod/assets/devgod/skills/devgod-manager/agents/openai.yaml",
     "devgod/assets/agents-block.md",
 )
+RETIRED_ASSETS = ("devgod/assets/devgod/agents/devgod-terra-lead.toml",)
 
 
 def command(argv: list[str], *, cwd: Path, env: dict[str, str], timeout: int = 180) -> str:
@@ -83,6 +84,9 @@ def main() -> int:
         with zipfile.ZipFile(wheel) as archive:
             names = set(archive.namelist())
             assert all(name in names for name in REQUIRED_ASSETS), "Wheel omitted plugin assets"
+            assert all(name not in names for name in RETIRED_ASSETS), (
+                "Wheel retained retired plugin assets"
+            )
             metadata = archive.read(next(name for name in names if name.endswith(".dist-info/METADATA"))).decode()
             assert "Description-Content-Type: text/markdown" in metadata, "Wheel lacks README metadata"
         with tarfile.open(source) as archive:
@@ -90,6 +94,10 @@ def main() -> int:
             assert all(
                 any(name.endswith("/src/" + asset) for name in names) for asset in REQUIRED_ASSETS
             ), "Source distribution omitted plugin assets"
+            assert all(
+                not any(name.endswith("/src/" + asset) for name in names)
+                for asset in RETIRED_ASSETS
+            ), "Source distribution retained retired plugin assets"
         report["artifacts"] = {
             "wheel": str(wheel), "sdist": str(source),
             "wheel_sha256": hashlib.sha256(wheel.read_bytes()).hexdigest(),

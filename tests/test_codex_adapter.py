@@ -362,7 +362,7 @@ def test_review_has_strict_schema_isolated_tools_and_observed_ids(candidate: Can
     client = factory.clients[0]
     start = next(payload for method, payload in client.requests if method == "thread/start")
     assert start["sandbox"] == "read-only" and start["approvalPolicy"] == "never"
-    assert start["model"] == "gpt-5.6-terra"
+    assert start["model"] == "gpt-5.6-sol"
     assert start["config"]["model_reasoning_effort"] == "high"
     assert start["config"]["mcp_servers"]["devgod"]["enabled"] is False
     assert start["config"]["plugins"]["other@local"]["enabled"] is False
@@ -455,7 +455,7 @@ def test_review_timeout_interrupts_provider_turn(candidate: Candidate) -> None:
 
 
 @pytest.mark.parametrize("role", ["reviewer", "qa_engineer", "security_reviewer"])
-def test_review_defaults_to_terra_high_without_leaking_source_route(
+def test_review_defaults_to_sol_high_without_leaking_source_route(
     candidate: Candidate, role: str
 ) -> None:
     factory = Factory(source_model="gpt-5.5", source_reasoning_effort="low")
@@ -470,7 +470,7 @@ def test_review_defaults_to_terra_high_without_leaking_source_route(
     assert result.succeeded
     client = factory.clients[0]
     start = next(payload for method, payload in client.requests if method == "thread/start")
-    assert start["model"] == "gpt-5.6-terra"
+    assert start["model"] == "gpt-5.6-sol"
     assert start["config"]["model_reasoning_effort"] == "high"
     assert client.config.cwd == candidate.snapshot_path
     assert start["cwd"] == candidate.snapshot_path

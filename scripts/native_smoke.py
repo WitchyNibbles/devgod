@@ -114,7 +114,7 @@ def validate_final_handoff(message: str) -> tuple[bool, str | None]:
 
     agents = bodies.get("Agents", "")
     planning_entry = re.search(
-        r"(?im)^\s*[-*]?\s*(?:native\s+)?(?:architect|planner|planning\s+lead|terra\s+lead)\s*:\s*"
+        r"(?im)^\s*[-*]?\s*(?:native\s+)?(?:architect|planner|planning\s+lead|sol\s+lead)\s*:\s*"
         r".*\b(?:completed|concluded|planned|recommended|approved|done)\b.*$",
         agents,
     )

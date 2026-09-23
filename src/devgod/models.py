@@ -120,7 +120,7 @@ class Policy(Model):
             return route
         if self.review_model is not None:
             return ModelRoute(model=self.review_model, reasoning_effort="high")
-        return ModelRoute(model="gpt-5.6-terra", reasoning_effort="high")
+        return ModelRoute(model="gpt-5.6-sol", reasoning_effort="high")
 
 
 class ModelRoute(Model):

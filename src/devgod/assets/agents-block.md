@@ -2,10 +2,10 @@ DevGod is intentionally enabled for this repository. For substantive implementat
 debugging, refactoring, or setup, use the manager skill at `{skill_path}`.
 
 The manager must establish the goal, success criteria, constraints, and main risk. It
-must dispatch the Terra planner before more than two local read or search calls, then
+must dispatch the Sol planner before more than two local read or search calls, then
 give at least one implementation child a bounded assignment when implementation
 remains. The only delegation exception is technical unavailability, which must be
-reported. Use the installed Luna worker, Terra lead, and Sol expert custom agents for
+reported. Use the installed Luna worker, Sol lead, and Sol expert custom agents for
 their documented roles, and use DevGod MCP for workflow records, checkpoints,
 executed checks, and independent reviewer, QA, and security verification.
 

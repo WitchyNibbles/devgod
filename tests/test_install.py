@@ -45,6 +45,13 @@ def test_role_agents_are_managed_and_preserve_user_edits(repo):
     install.init(repo)
     agents = [repo / ".codex/agents" / name for name in install.ROLE_AGENT_FILES]
     assert all(path.exists() for path in agents)
+    routes = {path.stem: tomllib.loads(path.read_text()) for path in agents}
+    assert routes["devgod-luna-worker"]["model"] == "gpt-5.6-luna"
+    assert routes["devgod-luna-worker"]["model_reasoning_effort"] == "medium"
+    assert routes["devgod-sol-lead"]["model"] == "gpt-5.6-sol"
+    assert routes["devgod-sol-lead"]["model_reasoning_effort"] == "medium"
+    assert routes["devgod-sol-expert"]["model"] == "gpt-5.6-sol"
+    assert routes["devgod-sol-expert"]["model_reasoning_effort"] == "high"
     manifest = json.loads((repo / install.MANIFEST).read_text())
     assert {str(path.relative_to(repo)) for path in agents} <= set(manifest["files"])
 
@@ -71,6 +78,117 @@ def test_role_agents_are_added_to_existing_version_two_manifest(repo):
     upgraded = json.loads(manifest_path.read_text())
     assert upgraded["version"] == 2
     assert all(f".codex/agents/{name}" in upgraded["files"] for name in install.ROLE_AGENT_FILES)
+
+
+def test_manifest_owned_unchanged_active_role_upgrades_to_packaged_revision(repo):
+    install.init(repo)
+    path = repo / ".codex/agents/devgod-sol-expert.toml"
+    old_content = path.read_text().replace("Sol lead", "Terra lead")
+    assert old_content != path.read_text()
+    path.write_text(old_content)
+    manifest_path = repo / install.MANIFEST
+    manifest = json.loads(manifest_path.read_text())
+    manifest["files"][".codex/agents/devgod-sol-expert.toml"] = install._digest(old_content)
+    manifest_path.write_text(json.dumps(manifest))
+
+    result = install.init(repo)
+
+    desired = (
+        install.ASSETS / "devgod" / "agents" / "devgod-sol-expert.toml"
+    ).read_text()
+    upgraded = json.loads(manifest_path.read_text())
+    assert path.read_text() == desired
+    assert ".codex/agents/devgod-sol-expert.toml" in result["changed"]
+    assert upgraded["files"][".codex/agents/devgod-sol-expert.toml"] == install._digest(
+        desired
+    )
+
+
+def test_unowned_different_active_role_asset_is_preserved(repo):
+    path = repo / ".codex/agents/devgod-sol-lead.toml"
+    path.parent.mkdir(parents=True)
+    path.write_text("name = \"devgod-sol-lead\"\n# user-owned route\n")
+
+    result = install.init(repo)
+
+    assert path.read_text() == "name = \"devgod-sol-lead\"\n# user-owned route\n"
+    assert ".codex/agents/devgod-sol-lead.toml" in result["preserved_edits"]
+
+
+def _add_owned_legacy_terra(repo: Path, content: str = "legacy terra route\n") -> Path:
+    path = repo / install.RETIRED_ROLE_AGENT_FILES[0]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content)
+    manifest_path = repo / install.MANIFEST
+    manifest = json.loads(manifest_path.read_text())
+    manifest["files"][install.RETIRED_ROLE_AGENT_FILES[0]] = install._digest(content)
+    manifest_path.write_text(json.dumps(manifest))
+    return path
+
+
+def test_upgrade_removes_only_unchanged_owned_legacy_terra_agent(repo):
+    install.init(repo)
+    legacy = _add_owned_legacy_terra(repo)
+
+    result = install.init(repo)
+
+    manifest = json.loads((repo / install.MANIFEST).read_text())
+    assert not legacy.exists()
+    assert install.RETIRED_ROLE_AGENT_FILES[0] in result["migrated"]
+    assert install.RETIRED_ROLE_AGENT_FILES[0] not in manifest["files"]
+
+
+def test_upgrade_preserves_edited_owned_legacy_terra_without_new_ownership(repo):
+    install.init(repo)
+    legacy = _add_owned_legacy_terra(repo)
+    legacy.write_text("locally edited legacy terra route\n")
+
+    result = install.init(repo)
+
+    manifest = json.loads((repo / install.MANIFEST).read_text())
+    assert legacy.read_text() == "locally edited legacy terra route\n"
+    assert install.RETIRED_ROLE_AGENT_FILES[0] in result["preserved_edits"]
+    assert install.RETIRED_ROLE_AGENT_FILES[0] not in manifest["files"]
+    install.uninstall(repo)
+    assert legacy.exists()
+
+
+def test_upgrade_leaves_unowned_legacy_terra_untouched(repo):
+    install.init(repo)
+    legacy = repo / install.RETIRED_ROLE_AGENT_FILES[0]
+    legacy.write_text("user-owned terra route\n")
+
+    result = install.init(repo)
+
+    manifest = json.loads((repo / install.MANIFEST).read_text())
+    assert legacy.read_text() == "user-owned terra route\n"
+    assert install.RETIRED_ROLE_AGENT_FILES[0] in result["preserved_edits"]
+    assert install.RETIRED_ROLE_AGENT_FILES[0] not in manifest["files"]
+
+
+@pytest.mark.parametrize("edited", [False, True])
+def test_old_manifest_uninstall_safely_handles_legacy_terra_agent(repo, edited):
+    install.init(repo)
+    legacy = _add_owned_legacy_terra(repo)
+    if edited:
+        legacy.write_text("edited legacy terra route\n")
+
+    result = install.uninstall(repo)
+
+    assert legacy.exists() is edited
+    collection = result["preserved"] if edited else result["removed"]
+    assert install.RETIRED_ROLE_AGENT_FILES[0] in collection
+
+
+def test_old_manifest_uninstall_rejects_retired_agent_near_match(repo):
+    install.init(repo)
+    manifest_path = repo / install.MANIFEST
+    manifest = json.loads(manifest_path.read_text())
+    manifest["files"][".codex/agents/devgod-terra-lead.toml.bak"] = install._digest("x")
+    manifest_path.write_text(json.dumps(manifest))
+
+    with pytest.raises(install.InstallError, match="unowned installation paths"):
+        install.uninstall(repo)
 
 
 @pytest.mark.parametrize("feature", [None, True])
